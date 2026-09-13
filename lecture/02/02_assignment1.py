@@ -142,6 +142,15 @@ def combo_label(combo):
     return ' & '.join(combo) if len(combo) == 2 else 'All Four Features'
 
 
+def plot_loss_curves(ax, losses_dict):
+    for label, losses in losses_dict.items():
+        ax.plot(range(1, len(losses) + 1), losses, marker='o', markersize=2, label=label)
+    ax.set_xlabel('Epochs')
+    ax.set_ylabel('Mean Squared Error (loss)')
+    ax.set_title('Loss vs Epoch by Feature Combination')
+    ax.legend(fontsize=7, loc='upper right')
+
+
 def main():
     df = pd.read_csv('tech_employees.csv')
 
@@ -160,6 +169,7 @@ def main():
 
     results = []
     pair_models = {}
+    all_losses = {}
 
     for combo in combos:
         X_train = train_df[list(combo)].to_numpy(dtype=float)
@@ -170,6 +180,7 @@ def main():
             eta=0.01, n_iter=80, adaptive=True, random_state=1,
         )
         results.append({'combo': combo, 'accuracy': acc})
+        all_losses[combo_label(combo)] = model.losses_
         if len(combo) == 2:
             pair_models[combo] = (model, scaler, X_test, y_test_full)
 
@@ -207,6 +218,40 @@ def main():
     plt.tight_layout()
     plt.savefig('assignment1_decision_boundaries.png', dpi=200)
     plt.close(fig)
+
+    # Loss vs Epoch 收斂曲線 (所有特徵組合)
+    fig2, ax2 = plt.subplots(figsize=(8, 6))
+    plot_loss_curves(ax2, all_losses)
+    plt.tight_layout()
+    plt.savefig('assignment1_loss_curves.png', dpi=200)
+    plt.close(fig2)
+
+    # 固定學習率 vs 自適應學習率對比 (以正確率最高的特徵組合為代表)
+    best_combo = results[0]['combo']
+    X_train_best = train_df[list(best_combo)].to_numpy(dtype=float)
+    X_test_best = test_df[list(best_combo)].to_numpy(dtype=float)
+
+    model_fixed, _, acc_fixed = train_and_evaluate(
+        X_train_best, y_train_full, X_test_best, y_test_full,
+        eta=0.01, n_iter=80, adaptive=False, random_state=1,
+    )
+    model_adaptive, _, acc_adaptive = train_and_evaluate(
+        X_train_best, y_train_full, X_test_best, y_test_full,
+        eta=0.01, n_iter=80, adaptive=True, random_state=1,
+    )
+
+    fig3, ax3 = plt.subplots(figsize=(8, 6))
+    ax3.plot(range(1, len(model_fixed.losses_) + 1), model_fixed.losses_,
+             marker='o', markersize=2, label=f'Fixed eta=0.01 (acc={acc_fixed:.2f})')
+    ax3.plot(range(1, len(model_adaptive.losses_) + 1), model_adaptive.losses_,
+             marker='s', markersize=2, label=f'Adaptive eta (acc={acc_adaptive:.2f})')
+    ax3.set_xlabel('Epochs')
+    ax3.set_ylabel('Mean Squared Error (loss)')
+    ax3.set_title(f'Fixed vs Adaptive Learning Rate ({combo_label(best_combo)})')
+    ax3.legend(fontsize=9)
+    plt.tight_layout()
+    plt.savefig('assignment1_adaptive_vs_fixed.png', dpi=200)
+    plt.close(fig3)
 
 
 if __name__ == '__main__':

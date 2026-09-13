@@ -1,0 +1,11 @@
+Feature Combination                     Test Accuracy
+-----------------------------------------------------
+Math_Skill & Coding_Skill                        0.84
+All Four Features                                0.83
+Language_Skill & Coding_Skill                    0.79
+Coding_Skill & Health_Condition                  0.75
+Language_Skill & Math_Skill                      0.61
+Language_Skill & Health_Condition                0.61
+Math_Skill & Health_Condition                    0.61
+
+結論：以「包含該特徵之組合平均正確率」排序，Coding_Skill (0.80)、Math_Skill (0.72)、Language_Skill (0.71)、Health_Condition (0.70)。Coding_Skill 鑑別度最高，Math_Skill 次之。

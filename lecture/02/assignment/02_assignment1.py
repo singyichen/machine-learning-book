@@ -41,32 +41,26 @@ class AdalineSGD:
         self.adaptive = adaptive
         self.decay = decay
         self.random_state = random_state
-        self.w_initialized = False
 
     def fit(self, X, y):
-        self._initialize_weights(X.shape[1])
+        self.rgen = np.random.RandomState(self.random_state)
+        self.w_ = self.rgen.normal(loc=0.0, scale=0.01, size=X.shape[1])
+        self.b_ = 0.0
         self.losses_ = []
         for i in range(self.n_iter):
+            # 自適應學習率：eta_t = eta_0 / (1 + decay * t)，隨 epoch 遞減讓收斂更穩定
             eta = self.eta / (1 + self.decay * i) if self.adaptive else self.eta
             if self.shuffle:
-                X, y = self._shuffle(X, y)
+                r = self.rgen.permutation(len(y))
+                X, y = X[r], y[r]
+            # SGD：逐筆樣本更新權重 (而非整批平均)，losses_ 記錄每個 epoch 的平均 MSE
             losses = [self._update_weights(xi, target, eta) for xi, target in zip(X, y)]
             self.losses_.append(np.mean(losses))
         return self
 
-    def _shuffle(self, X, y):
-        r = self.rgen.permutation(len(y))
-        return X[r], y[r]
-
-    def _initialize_weights(self, m):
-        self.rgen = np.random.RandomState(self.random_state)
-        self.w_ = self.rgen.normal(loc=0.0, scale=0.01, size=m)
-        self.b_ = 0.0
-        self.w_initialized = True
-
     def _update_weights(self, xi, target, eta):
-        output = self.activation(self.net_input(xi))
-        error = target - output
+        # 梯度下降：w += eta * dL/dw，其中 L = error^2 對 w 的偏微分為 -2 * xi * error
+        error = target - self.activation(self.net_input(xi))
         self.w_ += eta * 2.0 * xi * error
         self.b_ += eta * 2.0 * error
         return error ** 2
@@ -78,6 +72,7 @@ class AdalineSGD:
         return X
 
     def predict(self, X):
+        # 以 0.5 為閾值的階梯函數；net_input(X) = 0.5 即為決策邊界方程式
         return np.where(self.activation(self.net_input(X)) >= 0.5, 1, 0)
 
 
@@ -90,6 +85,7 @@ class StandardScaler:
         return self
 
     def transform(self, X):
+        # z = (x - mean) / std；mean_/std_ 永遠來自 fit() 當下的資料 (訓練集)，測試集不會重新計算
         return (X - self.mean_) / self.std_
 
     def fit_transform(self, X):
@@ -119,6 +115,7 @@ def plot_decision_regions(ax, X, y, classifier, feature_names, resolution=0.05):
     point_colors = ('#d62728', '#1f77b4')
     cmap = ListedColormap(('#f7c9c4', '#c9d7f0'))
 
+    # 手刻決策邊界：在特徵平面鋪一層網格，逐點呼叫 predict() 再用等高線圖上色
     x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
@@ -168,7 +165,7 @@ def main():
     combos = pair_combos + [tuple(feature_cols)]
 
     results = []
-    pair_models = {}
+    trained_models = {}  # combo -> (model, scaler, X_test)，供後面畫圖直接重用，避免重複訓練
     all_losses = {}
 
     for combo in combos:
@@ -181,8 +178,7 @@ def main():
         )
         results.append({'combo': combo, 'accuracy': acc})
         all_losses[combo_label(combo)] = model.losses_
-        if len(combo) == 2:
-            pair_models[combo] = (model, scaler, X_test, y_test_full)
+        trained_models[combo] = (model, scaler, X_test)
 
     results.sort(key=lambda r: r['accuracy'], reverse=True)
 
@@ -211,9 +207,9 @@ def main():
 
     fig, axes = plt.subplots(2, 3, figsize=(15, 9))
     for ax, combo in zip(axes.ravel(), pair_combos):
-        model, scaler, X_test, y_test = pair_models[combo]
+        model, scaler, X_test = trained_models[combo]
         X_test_std = scaler.transform(X_test)
-        plot_decision_regions(ax, X_test_std, y_test, model, combo)
+        plot_decision_regions(ax, X_test_std, y_test_full, model, combo)
 
     plt.tight_layout()
     plt.savefig('assignment1_decision_boundaries.png', dpi=200)
@@ -227,17 +223,16 @@ def main():
     plt.close(fig2)
 
     # 固定學習率 vs 自適應學習率對比 (以正確率最高的特徵組合為代表)
+    # 自適應版本已在上面主迴圈訓練過，直接重用 trained_models，只需額外訓練固定學習率版本
     best_combo = results[0]['combo']
+    acc_adaptive = results[0]['accuracy']
+    model_adaptive = trained_models[best_combo][0]
+
     X_train_best = train_df[list(best_combo)].to_numpy(dtype=float)
     X_test_best = test_df[list(best_combo)].to_numpy(dtype=float)
-
     model_fixed, _, acc_fixed = train_and_evaluate(
         X_train_best, y_train_full, X_test_best, y_test_full,
         eta=0.01, n_iter=80, adaptive=False, random_state=1,
-    )
-    model_adaptive, _, acc_adaptive = train_and_evaluate(
-        X_train_best, y_train_full, X_test_best, y_test_full,
-        eta=0.01, n_iter=80, adaptive=True, random_state=1,
     )
 
     fig3, ax3 = plt.subplots(figsize=(8, 6))

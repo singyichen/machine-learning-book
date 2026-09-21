@@ -2,7 +2,9 @@
 
 ## 目前進度
 
-本目錄已放入原始題目、訓練資料、待驗收資料，以及資料載入與驗證骨架。模型訓練、圖表與最終報告尚未實作。
+本作業已完成。程式包含手刻 Logistic Regression、特徵工程、標準化、
+binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓預測；另已產生
+結果報告與提交 ZIP。所有核心流程均未使用 scikit-learn。
 
 ## 這份作業在學什麼
 
@@ -36,15 +38,18 @@
 
 ## 預計輸出
 
-- 訓練損失曲線
-- 決策邊界與訓練樣本分布圖
-- DataFrame 格式的晶圓通過機率與驗收結果
+- `assignment2_loss_curves.png`：九組特徵轉換／學習率的訓練損失曲線
+- `assignment2_decision_boundary.png`：決策邊界與訓練樣本分布圖
+- `assignment2_predictions.csv`：DataFrame 格式的晶圓通過機率與驗收結果
+- `assignment2_results.txt`：特徵／學習率比較與驗收結果文字輸出
+- `Assignment2_陳欣怡_結果報告.pdf`：八頁結果報告
+- `Assignment2_陳欣怡.zip`：提交檔案
 
 ## 檔案
 
 - `Assignment_2.pdf`：原始作業題目
 - `wat_train.csv`：15 筆訓練資料
 - `wat_test.csv`：5 筆待驗收資料
-- `05_assignment2.py`：資料載入與驗證骨架
-- `test_05_assignment2.py`：資料契約測試
-- `verification_checklist.md`：後續實作與驗證清單
+- `05_assignment2.py`：完整模型訓練、比較、預測與視覺化程式
+- `test_05_assignment2.py`：資料契約、數學函數、前處理與整體流程測試
+- `verification_checklist.md`：完成後的逐項驗證紀錄

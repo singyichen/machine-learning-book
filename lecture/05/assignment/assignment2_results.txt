@@ -1,0 +1,24 @@
+Feature / learning-rate comparison
+==================================
+Feature Transformation Learning Rate Training Accuracy Initial Loss Final Loss
+                   raw          0.01            73.33%     0.693147   0.514383
+                   raw          0.10            73.33%     0.693147   0.497988
+                   raw          0.30            73.33%     0.693147   0.497987
+                   abs          0.01           100.00%     0.693147   0.244851
+                   abs          0.10           100.00%     0.693147   0.091491
+                   abs          0.30           100.00%     0.693147   0.064767
+                square          0.01            93.33%     0.693147   0.246942
+                square          0.10           100.00%     0.693147   0.079437
+                square          0.30           100.00%     0.693147   0.047711
+
+Selected model: abs(x1), learning rate=0.3
+Reason: abs(x1) is physically interpretable, reaches 100% training accuracy, and reproduces the assignment's reference output.
+
+Wafer acceptance results
+========================
+Wafer ID   x1  x2  abs_x1 Pass Probability Result
+ Wafer A -1.1 0.9     1.1           99.65%   Pass
+ Wafer B  4.5 0.3     4.5            4.91%   Fail
+ Wafer C  0.0 4.8     0.0            0.06%   Fail
+ Wafer D -2.2 1.9     2.2            9.55%   Fail
+ Wafer E  0.3 0.5     0.3          100.00%   Pass

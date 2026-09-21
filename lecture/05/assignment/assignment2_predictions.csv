@@ -1,0 +1,6 @@
+Wafer ID,x1,x2,abs_x1,Pass Probability,Result
+Wafer A,-1.1,0.9,1.1,0.996548411601881,Pass
+Wafer B,4.5,0.3,4.5,0.049120766059524465,Fail
+Wafer C,0.0,4.8,0.0,0.0005882932406683865,Fail
+Wafer D,-2.2,1.9,2.2,0.09554148667713494,Fail
+Wafer E,0.3,0.5,0.3,0.999955360797112,Pass

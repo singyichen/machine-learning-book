@@ -16,6 +16,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402  (backend 必須先設定)
 
+# 數學式以 Computer Modern 呈現（經典 LaTeX 外觀），與 Assignment #1 的報告一致。
+# matplotlib 的預設值是 dejavusans，屬無襯線體，兩者外觀差異明顯。
+matplotlib.rcParams["mathtext.fontset"] = "cm"
+
 
 BOLD_FONT_PATH = "/System/Library/Fonts/STHeiti Medium.ttc"
 BODY_FONT_PATH = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"

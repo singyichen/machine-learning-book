@@ -65,5 +65,33 @@ class WrapTextTests(unittest.TestCase):
         self.assertEqual(lines, ["第一行", "第二行"])
 
 
+class MathRenderingTests(unittest.TestCase):
+    """公式必須以 Computer Modern 呈現，才會與 Assignment #1 的報告一致。"""
+
+    def test_formulas_embed_computer_modern_not_the_matplotlib_default(self):
+        import tempfile
+
+        import fitz
+
+        report = report_style.Report()
+        report.page("測試")
+        report.math(r"$z = \dfrac{x - \mu}{\sigma}$", size=14)
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "math.pdf"
+            report.save(output)
+
+            document = fitz.open(output)
+            fonts = {font[3].split("+")[-1] for font in document[0].get_fonts()}
+            document.close()
+
+        # matplotlib 預設的 mathtext.fontset 是 dejavusans，與 Assignment #1
+        # 的 Cmr10 / Cmmi10 / Cmsy10 外觀完全不同。
+        self.assertTrue(
+            any(name.lower().startswith("cm") for name in fonts),
+            f"公式未使用 Computer Modern，實際字型：{sorted(fonts)}",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

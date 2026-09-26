@@ -108,8 +108,13 @@ report.save(輸出路徑)
 
 ## 這個環境的地雷
 
-- **`n_jobs=-1` 會讓 GridSearchCV 崩掉**（loky worker SIGBUS）。省略該參數用單行程，
-  這種規模的資料幾秒就跑完。
+- **不要把 numpy 降回 1.21.2**。2026-09-26 已升級為 `numpy==1.26.4` / `scipy==1.13.1`
+  （sklearn 1.0.2 相容，全套測試通過）。1.21.2 內建的 OpenBLAS 在 ARM64 上的
+  `dgemm_tcopy` 核心有緩衝區溢位，只要 LogisticRegression 在 64 維特徵上訓練就會
+  SIGBUS，macOS 還會一直跳當機回報視窗。更麻煩的是溢位**不一定會崩**——隔壁是普通
+  記憶體時就靜默污染運算結果。
+  根目錄的 `environment.yml` 仍鎖著 `numpy=1.21.2`，那是書本上游的 conda 設定、
+  我們沒在用，**不要照它調整 `.venv`**。
 - **模組檔名以數字開頭不能 import**，測試要用 `importlib.util.spec_from_file_location`
   載入。既有測試檔都有 `load_module()` helper 可抄。
 - **中文字型**：粗體 `/System/Library/Fonts/STHeiti Medium.ttc`，

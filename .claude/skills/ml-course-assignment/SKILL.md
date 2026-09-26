@@ -129,3 +129,9 @@ report.save(輸出路徑)
 
 在 `main` 上直接 commit 並 push（這是個人課程 repo，歷史都是如此）。
 commit message 用中文描述成果與驗證結果，附上實際數字。
+
+已確認過的慣例，不用再問：
+
+- 繳交 zip 與模型 `.pkl` **保留在版控中**，當作繳交紀錄，不要建議加進 `.gitignore`。
+- Assignment #1 的報告檔名維持舊格式 `Assignment1_陳欣怡_結果報告.pdf`（已繳交，不補學號前綴）。
+  學號前綴規則只適用 #2 之後。

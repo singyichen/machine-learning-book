@@ -42,8 +42,8 @@ binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓
 - `assignment2_decision_boundary.png`：決策邊界與訓練樣本分布圖
 - `assignment2_predictions.csv`：DataFrame 格式的晶圓通過機率與驗收結果
 - `assignment2_results.txt`：特徵／學習率比較與驗收結果文字輸出
-- `Assignment2_陳欣怡_結果報告.pdf`：八頁結果報告
-- `Assignment2_陳欣怡.zip`：提交檔案
+- `515661055_陳欣怡_Assignment2_結果報告.pdf`：八頁結果報告
+- `515661055_陳欣怡_Assignment2.zip`：提交檔案
 
 ## 檔案
 

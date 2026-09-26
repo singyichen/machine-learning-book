@@ -41,7 +41,7 @@
 - [x] 已在 `lecture/05/assignment` 直接執行 `05_assignment2.py`，exit code 0 且四項輸出檔成功產生
 - [x] 兩張 PNG 已逐張目視檢查，標題、座標軸、圖例完整，無裁切或重疊
 - [x] 結果欄位為 `Wafer ID`、`x1`、`x2`、`abs_x1`、`Pass Probability`、`Result`，與題目範例一致
-- [x] `Assignment2_陳欣怡_結果報告.pdf`（A4、8 頁）與 `Assignment2_陳欣怡.zip`（7 個提交檔）已產生；PDF 已逐頁渲染檢查
+- [x] `515661055_陳欣怡_Assignment2_結果報告.pdf`（A4、8 頁）與 `515661055_陳欣怡_Assignment2.zip`（5 個提交檔）已產生；PDF 已逐頁渲染檢查
 
 ---
 

@@ -1,0 +1,151 @@
+{
+  "generated": "2026-09-26",
+  "cv_folds": 5,
+  "n_train": 1437,
+  "n_test": 360,
+  "baseline": {
+    "selector_C": 0.1,
+    "max_features": 40,
+    "classifier_C": 1.0
+  },
+  "experiments": [
+    {
+      "group": "feature_budget",
+      "label": "64 個（不受作業限制）",
+      "baseline": false,
+      "cv_mean": 0.9679974835462641,
+      "cv_std": 0.005936220031121318
+    },
+    {
+      "group": "feature_budget",
+      "label": "44 個（作業上限）",
+      "baseline": false,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.009477739173804114
+    },
+    {
+      "group": "feature_budget",
+      "label": "40 個（現況選用）",
+      "baseline": true,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.008954466936577862
+    },
+    {
+      "group": "feature_budget",
+      "label": "32 個",
+      "baseline": false,
+      "cv_mean": 0.9575421022067365,
+      "cv_std": 0.008682329150504197
+    },
+    {
+      "group": "selection_method",
+      "label": "L1 權重排序（現況做法）",
+      "baseline": false,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.009477739173804114
+    },
+    {
+      "group": "selection_method",
+      "label": "ANOVA F 檢定 (SelectKBest)",
+      "baseline": false,
+      "cv_mean": 0.9673006194347659,
+      "cv_std": 0.007133469846507835
+    },
+    {
+      "group": "selection_method",
+      "label": "互資訊 (mutual information)",
+      "baseline": false,
+      "cv_mean": 0.9652172861014325,
+      "cv_std": 0.009546915871571153
+    },
+    {
+      "group": "selection_method",
+      "label": "RFE 遞迴特徵消除",
+      "baseline": false,
+      "cv_mean": 0.965909310878823,
+      "cv_std": 0.005939089419080725
+    },
+    {
+      "group": "hyperparameter",
+      "label": "分類器 C = 0.3",
+      "baseline": false,
+      "cv_mean": 0.9652076074332172,
+      "cv_std": 0.005808997254113552
+    },
+    {
+      "group": "hyperparameter",
+      "label": "分類器 C = 1.0（現況）",
+      "baseline": true,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.008954466936577862
+    },
+    {
+      "group": "hyperparameter",
+      "label": "分類器 C = 3.0",
+      "baseline": false,
+      "cv_mean": 0.9631266937669377,
+      "cv_std": 0.01254217419808995
+    },
+    {
+      "group": "hyperparameter",
+      "label": "L1 選取器 C = 0.01",
+      "baseline": false,
+      "cv_mean": 0.9568621757646149,
+      "cv_std": 0.0046465017072678735
+    },
+    {
+      "group": "hyperparameter",
+      "label": "L1 選取器 C = 0.1（現況）",
+      "baseline": true,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.008954466936577862
+    },
+    {
+      "group": "hyperparameter",
+      "label": "L1 選取器 C = 0.5",
+      "baseline": false,
+      "cv_mean": 0.9596423732094463,
+      "cv_std": 0.00838547268895207
+    },
+    {
+      "group": "augmentation",
+      "label": "不擴增（現況）",
+      "baseline": true,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.008954466936577862
+    },
+    {
+      "group": "augmentation",
+      "label": "影像平移 1 像素，訓練資料 ×5",
+      "baseline": false,
+      "cv_mean": 0.8754307007355788,
+      "cv_std": 0.007821154462252542
+    },
+    {
+      "group": "nonlinear",
+      "label": "Logistic Regression（線性，現況）",
+      "baseline": true,
+      "cv_mean": 0.9638187185443282,
+      "cv_std": 0.008954466936577862
+    },
+    {
+      "group": "nonlinear",
+      "label": "SVM (RBF 核)，同樣只用 40 個像素",
+      "baseline": false,
+      "cv_mean": 0.989561556329849,
+      "cv_std": 0.003111116025114967
+    }
+  ],
+  "test_set": [
+    {
+      "label": "現況：L1 選 40 個 + LR",
+      "accuracy": 0.975,
+      "errors": 9
+    },
+    {
+      "label": "CV 最佳：ANOVA F 選 44 個 + LR",
+      "accuracy": 0.9722222222222222,
+      "errors": 10
+    }
+  ]
+}

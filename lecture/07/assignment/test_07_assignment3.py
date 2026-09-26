@@ -134,6 +134,36 @@ class TrainedPipelineTests(unittest.TestCase):
             self.assertEqual(Path(model_path).name, "digits_pipeline_lr.pkl")
 
 
+class ImprovementStudyTests(unittest.TestCase):
+    """報告的改善空間討論引用這份研究，數字必須對應真正交出去的管線。"""
+
+    def test_study_baseline_matches_the_saved_pipeline(self):
+        import joblib
+
+        study = load_module(ASSIGNMENT_DIR / "07_assignment3_explore.py", "assignment3_explore")
+        model = joblib.load(ASSIGNMENT_DIR / "digits_pipeline_lr.pkl")
+
+        baseline = study.baseline_config()
+
+        # 研究的基準組若和實際交出去的管線漂移，報告就會拿不同的模型互相比較。
+        self.assertEqual(
+            baseline["max_features"],
+            int(model.named_steps["selector"].get_support().sum()),
+        )
+        self.assertEqual(baseline["classifier_C"], model.named_steps["classifier"].C)
+        self.assertEqual(baseline["selector_C"], model.named_steps["selector"].estimator.C)
+
+    def test_study_reports_every_group_the_report_section_renders(self):
+        study = load_module(ASSIGNMENT_DIR / "07_assignment3_explore.py", "assignment3_explore")
+
+        groups = {spec["group"] for spec in study.EXPERIMENTS}
+
+        self.assertEqual(
+            groups,
+            {"feature_budget", "selection_method", "hyperparameter", "augmentation", "nonlinear"},
+        )
+
+
 class SubmissionConstraintTests(unittest.TestCase):
     """作業規定：繳交的評估程式不得含任何訓練或模型選取程式碼。"""
 

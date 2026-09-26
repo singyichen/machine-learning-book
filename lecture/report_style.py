@@ -53,6 +53,13 @@ BULLET_STEP = 0.0265
 # 中文排版禁則：這些標點不得出現在行首。
 NO_LINE_START = "、。，；：！？）」』〉》〕｝］%,.;:!?)]}"
 
+# 頁碼在 0.043 的高度，內容低於這條線就會壓到頁碼或被裁掉。
+BOTTOM_LIMIT = 0.075
+
+
+class PageOverflow(RuntimeError):
+    """內容超出頁面可用高度。把該頁拆開，或縮減內容。"""
+
 
 def text_units(text):
     """以「全形字 = 1 欄」計算文字寬度；半形字算 0.5 欄。"""
@@ -119,6 +126,7 @@ class Report:
         self.figure = None
         self.y = 0.0
         self.page_number = 0
+        self.page_heading = None
         self.metadata = metadata or {}
 
     # --- 頁面管理 -------------------------------------------------
@@ -132,6 +140,14 @@ class Report:
     def _write(self, x, y, text, size, prop, color=INK, ha="left", va="top"):
         self.figure.text(x, y, text, fontsize=size, fontproperties=prop, color=color, ha=ha, va=va)
 
+    def _check_room(self):
+        """游標低於底線代表內容已溢出——靜默裁切很難發現，直接報錯。"""
+        if self.page_heading is not None and self.y < BOTTOM_LIMIT:
+            raise PageOverflow(
+                f"「{self.page_heading}」這一頁的內容超出可用高度"
+                f"（游標 {self.y:.3f} < 底線 {BOTTOM_LIMIT}）。請把這頁拆成兩頁。"
+            )
+
     def _page_number(self):
         self.figure.text(
             RIGHT, 0.043, str(self.page_number), fontsize=9, fontproperties=BODY,
@@ -140,6 +156,7 @@ class Report:
 
     def cover(self, title, subtitle, series, identity, info_lines):
         self._new_figure()
+        self.page_heading = None
         self._write(0.5, 0.64, title, TITLE_SIZE, BOLD, ha="center", va="center")
         self._write(0.5, 0.565, subtitle, SUBTITLE_SIZE, BOLD, ha="center", va="center")
         self._write(0.5, 0.478, series, 12, BODY, color="#333333", ha="center", va="center")
@@ -156,6 +173,7 @@ class Report:
     def page(self, heading):
         self._new_figure()
         self.page_number += 1
+        self.page_heading = heading
         self._write(LEFT, 0.952, heading, HEADING_SIZE, BOLD)
         self.figure.add_artist(
             plt.Line2D([LEFT, RIGHT], [0.9235, 0.9235], color=RULE, linewidth=0.9)
@@ -179,6 +197,7 @@ class Report:
         for line in wrap_text(body, max_units):
             self._write(LEFT + indent, self.y, line, size, BODY, color=color)
             self.y -= LINE_STEP
+        self._check_room()
         return self
 
     def bullets(self, items, size=BODY_SIZE):
@@ -192,6 +211,7 @@ class Report:
             for offset, line in enumerate(lines):
                 self._write(text_x, self.y - offset * LINE_STEP, line, size, BODY)
             self.y -= BULLET_STEP + (len(lines) - 1) * LINE_STEP
+        self._check_room()
         return self
 
     def math(self, expression, size=13, space=0.044):
@@ -205,6 +225,7 @@ class Report:
             LEFT + 0.06, self.y, expression, fontsize=size, color=INK, ha="left", va="top"
         )
         self.y -= space
+        self._check_room()
         return self
 
     def mono(self, block, size=MONO_SIZE):
@@ -215,6 +236,7 @@ class Report:
                 fontproperties=mono_prop, color=INK, ha="left", va="top",
             )
             self.y -= 0.0155
+        self._check_room()
         return self
 
     def table(self, headers, rows, widths, size=BODY_SIZE):
@@ -258,6 +280,7 @@ class Report:
             y -= row_height
 
         self.y = y - 0.028
+        self._check_room()
         return self
 
     def figure_image(self, image_path, height=0.46, caption=None):
@@ -269,6 +292,7 @@ class Report:
         self.y = top - height - 0.032
         if caption:
             self.text(caption, size=CAPTION_SIZE, color="#222222")
+        self._check_room()
         return self
 
     # --- 輸出 -----------------------------------------------------

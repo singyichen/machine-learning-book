@@ -7,6 +7,7 @@
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+import json
 import sys
 
 
@@ -27,7 +28,7 @@ def load_module(filename, name):
     return module
 
 
-def build(training, evaluation, mask_figure, confusion_figure):
+def build(training, evaluation, study, mask_figure, confusion_figure):
     selected = int(training["selected_pixels"])
     dropped = 64 - selected
     accuracy = evaluation["accuracy"]
@@ -212,8 +213,76 @@ def build(training, evaluation, mask_figure, confusion_figure):
         ),
     )
 
-    # --- 八、總結 ---
-    report.page("八、總結")
+    # --- 八、改善空間討論（一）---
+    def rows_for(group):
+        return [
+            (
+                e["label"] + ("　←" if e["baseline"] else ""),
+                f"{e['cv_mean']:.4f}",
+                f"± {e['cv_std']:.4f}",
+            )
+            for e in study["experiments"] if e["group"] == group
+        ]
+
+    report.page("八、改善空間討論（一）：特徵數量與選取方法")
+    report.text(
+        f"以下比較皆在訓練集（{study['n_train']} 筆）上以 {study['cv_folds']}-fold 交叉驗證進行，"
+        "測試集不參與任何設定的挑選。標示 ← 者為繳交版本採用的設定。"
+    )
+    report.gap(0.026)
+    report.subheading("放寬特徵數量上限的代價")
+    report.table(["可用特徵數", "CV 正確率", "標準差"], rows_for("feature_budget"), [2.4, 1.3, 1.3])
+    report.text(
+        "從 40 個放寬到不受限的 64 個，CV 只提升約 0.4 個百分點；44 個與 40 個更是幾乎相同。"
+        "影像邊角有數個像素在整個訓練集恆為 0，本來就不帶資訊，因此作業的特徵上限"
+        "並沒有真正限制到模型的能力。"
+    )
+    report.gap(0.026)
+    report.subheading("換用其他特徵選取方法（皆固定 44 個）")
+    report.table(["選取方法", "CV 正確率", "標準差"], rows_for("selection_method"), [2.4, 1.3, 1.3])
+    report.text(
+        "四種方法的差距都在 0.4 個百分點以內，且彼此的標準差互有重疊，"
+        "難以判定何者確實較優。"
+    )
+
+    # --- 九、改善空間討論（二）---
+    report.page("九、改善空間討論（二）：超參數與資料擴增")
+    report.subheading("超參數微調")
+    report.table(["設定", "CV 正確率", "標準差"], rows_for("hyperparameter"), [2.4, 1.3, 1.3])
+    report.text("正則化強度往兩側調整都沒有帶來提升，顯示目前的設定已接近這個模型的最佳點。")
+    report.gap(0.022)
+    report.subheading("資料擴增：在 8 × 8 影像上反而有害")
+    report.table(["訓練資料", "CV 正確率", "標準差"], rows_for("augmentation"), [2.4, 1.3, 1.3])
+    report.text(
+        "將影像上下左右各平移 1 像素、訓練資料擴增為 5 倍，正確率大幅下降。"
+        "原因是 8 × 8 影像的數字幾乎填滿整個畫面、沒有邊距，平移一格就會直接切掉一整行筆畫。"
+        "同樣的手法在 28 × 28 的 MNIST 上有效，是因為數字周圍留有大片空白——"
+        "技巧是否適用取決於資料本身的性質。"
+    )
+
+    # --- 十、改善空間討論（三）---
+    report.page("十、改善空間討論（三）：模型上限與最終取捨")
+    report.subheading("真正的瓶頸：線性模型")
+    report.table(["分類器（皆只用 40 個像素）", "CV 正確率", "標準差"], rows_for("nonlinear"), [2.4, 1.3, 1.3])
+    test_rows = [(t["label"], f"{t['accuracy']:.4f}", f"{t['errors']} 筆") for t in study["test_set"]]
+    report.text(
+        "在完全相同的 40 個像素上改用 RBF 核的 SVM，CV 提升約 2.6 個百分點，"
+        "遠大於前面所有調整的幅度。這說明限制效能的是 Logistic Regression 的線性決策邊界，"
+        "而非特徵數量或超參數。本作業指定使用 Logistic Regression，故此組僅作為討論對照。"
+    )
+    report.gap(0.022)
+    report.subheading("為何不採用 CV 較佳的設定")
+    report.table(["設定", "測試集正確率", "誤判數"], test_rows, [2.8, 1.3, 1.0])
+    report.text(
+        f"ANOVA F 檢定在交叉驗證上較佳，但在測試集反而多錯一筆。"
+        f"測試集僅 {study['n_test']} 筆，一筆就相當於 0.28 個百分點，"
+        "上述所有差異都落在這個量級之內。若為了這種幅度而反覆比較測試集結果並據以選擇設定，"
+        "等同於把測試集當成驗證集使用，反而會高估模型的真實表現。"
+        "因此最終維持以交叉驗證選出的原設定不變。"
+    )
+
+    # --- 十一、總結 ---
+    report.page("十一、總結")
     report.text(
         "本作業以 scikit-learn 建立低解析度手寫數字的多類別分類器，"
         "完成資料切分、特徵縮放、L1 特徵選取、交叉驗證模型選取與模型評估，"
@@ -236,7 +305,8 @@ def build(training, evaluation, mask_figure, confusion_figure):
     report.bullets([
         f"僅用 {selected} 個像素（淘汰 {dropped} 個）即達成 {accuracy * 100:.2f}% 測試正確率，高於 95% 門檻",
         "被淘汰的像素全部落在影像邊緣，與手寫數字的背景區域吻合",
-        "40 與 44 個像素的交叉驗證表現相同，顯示再多的邊緣像素並未帶來額外資訊",
+        "40 與 44 個像素的交叉驗證表現相同，放寬到 64 個也只多 0.4 個百分點",
+        "改用 RBF 核 SVM 可達 0.9896，顯示瓶頸在線性決策邊界而非特徵數量（詳見第八至十節）",
         "繳交的評估程式不含任何訓練或模型選取程式碼，助教可直接執行批閱",
     ])
     report.gap(0.024)
@@ -253,6 +323,13 @@ def main():
     train_module = load_module("07_assignment3_train.py", "assignment3_train")
     eval_module = load_module("07_assignment3_eval.py", "assignment3_eval")
 
+    study_path = ASSIGNMENT_DIR / "assignment3_improvement_study.json"
+    if study_path.exists():
+        study = json.loads(study_path.read_text(encoding="utf-8"))
+    else:
+        explore = load_module("07_assignment3_explore.py", "assignment3_explore")
+        study, _ = explore.run_study(output_dir=ASSIGNMENT_DIR)
+
     training = train_module.run_training(output_dir=ASSIGNMENT_DIR)
     evaluation = eval_module.run_evaluation(
         model_path=training["model_path"], output_dir=ASSIGNMENT_DIR
@@ -261,6 +338,7 @@ def main():
     report = build(
         training,
         evaluation,
+        study,
         ASSIGNMENT_DIR / eval_module.MASK_FIGURE,
         ASSIGNMENT_DIR / eval_module.CONFUSION_FIGURE,
     )

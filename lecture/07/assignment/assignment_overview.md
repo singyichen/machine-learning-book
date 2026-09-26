@@ -58,7 +58,8 @@ StandardScaler → SelectFromModel(L1 LogisticRegression) → LogisticRegression
 - `assignment3_feature_mask.png`：8×8 特徵選取遮罩圖，標題含選取比例 40/64
 - `assignment3_confusion_matrix.png`：測試集混淆矩陣
 - `assignment3_results.txt`：分類報告與混淆矩陣文字輸出
-- `515661055_陳欣怡_Assignment3_結果報告.pdf`：九頁結果報告
+- `assignment3_improvement_study.json`：改善空間研究的量測結果
+- `515661055_陳欣怡_Assignment3_結果報告.pdf`：十二頁結果報告（含改善空間討論）
 - `515661055_陳欣怡_Assignment3.zip`：提交檔案
 
 ## 檔案
@@ -67,5 +68,6 @@ StandardScaler → SelectFromModel(L1 LogisticRegression) → LogisticRegression
 - `07_assignment3_train.py`：訓練、特徵選取、模型選取與管線儲存（**不繳交**）
 - `07_assignment3_eval.py`：模型評估程式（**繳交**）
 - `test_07_assignment3.py`：切分契約、特徵上限、模型儲存與繳交限制測試
+- `07_assignment3_explore.py`：改善空間研究，輸出量測 JSON（**不繳交**）
 - `build_report.py`：結果報告 PDF 產生器（版面共用 `lecture/report_style.py`）
 - `verification_checklist.md`：完成後的逐項驗證紀錄

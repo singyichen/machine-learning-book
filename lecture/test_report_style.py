@@ -65,6 +65,27 @@ class WrapTextTests(unittest.TestCase):
         self.assertEqual(lines, ["第一行", "第二行"])
 
 
+class OverflowGuardTests(unittest.TestCase):
+    """內容超出頁面底部時會被靜默裁掉，必須主動報錯而不是默默產出壞頁面。"""
+
+    def test_page_overflow_raises_instead_of_silently_clipping(self):
+        report = report_style.Report()
+        report.page("測試")
+
+        with self.assertRaisesRegex(report_style.PageOverflow, "測試"):
+            for _ in range(80):
+                report.text("填滿頁面用的文字。")
+
+    def test_a_page_within_its_budget_does_not_raise(self):
+        report = report_style.Report()
+        report.page("測試")
+
+        for _ in range(20):
+            report.text("填滿頁面用的文字。")
+
+        self.assertGreater(report.y, report_style.BOTTOM_LIMIT)
+
+
 class MathRenderingTests(unittest.TestCase):
     """公式必須以 Computer Modern 呈現，才會與 Assignment #1 的報告一致。"""
 

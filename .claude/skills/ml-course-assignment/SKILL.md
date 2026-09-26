@@ -97,7 +97,10 @@ report.save(輸出路徑)
 頁面結構慣例（約 8–9 頁）：封面 / 一、作業說明 / 二、數學觀念 / 三、訓練與評估流程 /
 四～七、各項預期結果 / 八、總結（含驗收項目對照表與主要發現）。
 
-**數學式用 mathtext**（`r"$\dfrac{a}{b}$"`），會以 Computer Modern 呈現，和 A1 一致。
+**數學式用 mathtext**（`r"$\dfrac{a}{b}$"`）。`report_style.py` 已設定
+`matplotlib.rcParams["mathtext.fontset"] = "cm"`，公式才會以 Computer Modern
+呈現、和 A1 的襯線外觀一致——**不要拿掉這行**。matplotlib 的預設值是 `dejavusans`
+（無襯線），語法一樣能編譯、圖也畫得出來，但外觀和 A1 完全不同，光看版面結構不會發現。
 分式與連加符號的實際高度遠大於字級，`space` 給不夠會壓到下一段文字——產生後一定要
 渲染檢查。
 
@@ -123,6 +126,19 @@ report.save(輸出路徑)
 - [ ] 突變檢測：故意改壞關鍵常數與邏輯，確認測試會失敗
 - [ ] 解壓繳交 zip 到**乾淨的暫存目錄**直接執行，確認不依賴任何未繳交的檔案
 - [ ] 報告 PDF 逐頁用 Read 渲染檢查，特別注意公式重疊與行首標點
+- [ ] 比對三份報告內嵌的字型，確認風格真的一致（版面對了不代表字型對了）：
+
+      ```bash
+      .venv/bin/python -c "
+      import fitz
+      for p in ['lecture/02/assignment/Assignment1_陳欣怡_結果報告.pdf', ...]:
+          d = fitz.open(p)
+          print(p, sorted({f[3].split('+')[-1] for pg in d for f in pg.get_fonts()}))
+      "
+      ```
+
+      三份都應該出現 `Cmr10` / `Cmmi10` / `Cmsy10`（數學式）與 `STHeitiTC-Medium`（粗體中文）。
+      若看到 `DejaVuSans-Oblique`，表示 mathtext 字型設定沒生效。
 - [ ] `verification_checklist.md` 寫入實際數值，而非「已完成」
 
 ## Commit

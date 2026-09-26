@@ -52,4 +52,5 @@ binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓
 - `wat_test.csv`：5 筆待驗收資料
 - `05_assignment2.py`：完整模型訓練、比較、預測與視覺化程式
 - `test_05_assignment2.py`：資料契約、數學函數、前處理與整體流程測試
+- `build_report.py`：結果報告 PDF 產生器（版面共用 `lecture/report_style.py`）
 - `verification_checklist.md`：完成後的逐項驗證紀錄

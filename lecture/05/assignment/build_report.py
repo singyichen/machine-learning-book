@@ -79,29 +79,29 @@ def build(result):
 
     # --- 二、數學觀念 ---
     report.page("二、數學觀念")
-    report.subheading("1. 特徵工程")
+    report.subheading("1. 特徵工程", level=2)
     report.text(
         "x1 的正負號代表偏差方向，但製程風險取決於偏差幅度。"
         "因此比較原始 x1、絕對值 abs(x1) 與平方 x1 ** 2 三種表示。"
     )
     report.gap(0.022)
-    report.subheading("2. 標準化（Z-score）")
+    report.subheading("2. 標準化（Z-score）", level=2)
     report.math(r"$z = \dfrac{x - \mu_{train}}{\sigma_{train}}$", size=14, space=0.058)
     report.text(
         "μ 與 σ 僅由訓練資料計算；待驗收資料只使用相同統計值進行 transform，避免資料洩漏。"
     )
     report.gap(0.022)
-    report.subheading("3. Logistic Regression")
+    report.subheading("3. Logistic Regression", level=2)
     report.math(r"$p = \sigma(\mathbf{w} \cdot \mathbf{x} + b) = \dfrac{1}{1 + e^{-z}}$",
                 size=14, space=0.058)
     report.text("當 p ≥ 0.5 時預測為 Pass，否則預測為 Fail；p 同時作為晶圓的通過機率。")
     report.gap(0.022)
-    report.subheading("4. Binary Cross-Entropy 與梯度下降")
+    report.subheading("4. Binary Cross-Entropy 與梯度下降", level=2)
     report.math(r"$\mathrm{BCE} = -\dfrac{1}{n}\sum_{i=1}^{n}"
                 r"\left[ y_i \log p_i + (1-y_i)\log(1-p_i) \right]$", size=14, space=0.070)
     report.text("每個 epoch 使用全部 15 筆訓練資料計算梯度，更新 weights 與 bias，使 BCE 逐步下降。")
     report.gap(0.016)
-    report.subheading("5. 正確率")
+    report.subheading("5. 正確率", level=2)
     report.math(r"$\mathrm{Accuracy} = \dfrac{n_{correct}}{n_{total}}$", size=14, space=0.058)
     report.text("n_total：訓練集總筆數（15）。")
 
@@ -119,7 +119,7 @@ def build(result):
         "9. 預測 5 筆晶圓的通過機率，輸出 DataFrame、CSV 與文字結果",
     ])
     report.gap(0.03)
-    report.subheading("關鍵限制")
+    report.subheading("關鍵限制", level=2)
     report.text(
         "標準化的平均值與標準差只能用訓練集計算，避免資料洩漏；"
         "權重固定由零初始化且流程中無任何隨機步驟，因此每次執行的結果完全一致。"
@@ -145,7 +145,7 @@ def build(result):
         rows,
         [1.3, 1.0, 1.4, 1.3, 1.3],
     )
-    report.subheading("結論")
+    report.subheading("結論", level=2)
     report.text(
         "原始 x1 因正、負偏差互相抵銷，最高訓練正確率僅 73.33%。"
         "abs(x1) 與 x1 ** 2 都能表達偏差幅度並達到 100%；"
@@ -180,14 +180,14 @@ def build(result):
         ),
     )
     report.gap(0.016)
-    report.subheading("觀察")
+    report.subheading("觀察", level=2)
     report.text(
         "Loss 曲線可確認訓練是否收斂，但只有訓練資料，無法據此判斷過擬合或泛化能力；"
         "本作業重點為正確實作 Logistic Regression 與資料前處理流程。"
     )
 
-    # --- 七、待驗收結果與總結 ---
-    report.page("七、待驗收結果與總結")
+    # --- 七、待驗收結果 ---
+    report.page("七、待驗收結果")
     report.text("以最終模型預測 5 筆全新晶圓；分類閾值為 0.5。")
     report.gap(0.03)
     prediction_rows = [
@@ -206,20 +206,28 @@ def build(result):
         prediction_rows,
         [1.4, 0.9, 0.9, 1.1, 1.4, 0.9],
     )
-    report.subheading("主要發現")
-    report.bullets([
-        "偏差幅度（abs(x1)）比帶號偏差更具鑑別度，正確率由 73.33% 提升至 100%",
-        "Wafer A 與 Wafer E 的偏差幅度小且污染度低，判定為 Pass",
-        "Wafer B 偏差幅度達 4.5、Wafer C 污染度達 4.8，皆判定為 Fail",
-        "五筆預測機率與題目投影片的參考輸出完全一致",
-    ])
-    report.gap(0.022)
-    report.subheading("總結")
+    report.subheading("結論", level=2)
+    report.text(
+        "Wafer A 與 Wafer E 的偏差幅度小且污染度低，判定為 Pass；"
+        "Wafer B 偏差幅度達 4.5、Wafer C 污染度達 4.8，皆判定為 Fail。"
+        "五筆預測機率與題目投影片的參考輸出完全一致。"
+    )
+
+    # --- 八、總結（與 A1 相同：總結段落在前，主要發現在後）---
+    report.page("八、總結")
     report.text(
         "本作業從零實作 Logistic Regression（未使用 scikit-learn），"
         "完成資料驗證、特徵工程、標準化、梯度下降訓練、學習率比較、"
         "決策邊界與 loss 曲線視覺化，並輸出 5 筆待驗收晶圓的通過機率與 Pass／Fail 結果。"
     )
+    report.gap(0.05)
+    report.subheading("主要發現")
+    report.bullets([
+        "偏差幅度（abs(x1)）比帶號偏差更具鑑別度，正確率由 73.33% 提升至 100%",
+        "learning rate = 0.3 收斂最快且未發散，1,000 epochs 內 loss 持續下降",
+        "Wafer A、E 判定為 Pass，Wafer B、C、D 判定為 Fail",
+        "所有結果皆經過複驗（詳見 verification_checklist.md），數值與圖表可重現",
+    ])
 
     return report
 

@@ -76,8 +76,28 @@ python .claude/skills/ml-course-assignment/scripts/make_submission.py \
 
 ## 結果報告版面
 
-以 Assignment #1 的報告為基準，共用模組在 `lecture/report_style.py`，用 matplotlib
-PdfPages 繪製。`build_report.py` 照這個骨架寫：
+以**已繳交的** Assignment #1 報告為基準（commit 77ecd01，Creator 為
+「PyMuPDF typography-adjusted report builder」）。那份是先用 matplotlib 產生、再以
+PyMuPDF 調整字體的版本，調整用的程式**不在 repo 裡**——所以不要拿 repo 裡較舊的
+matplotlib 版面當基準。實測規格已寫進 `lecture/report_style.py` 並由
+`lecture/test_report_style.py` 鎖住：
+
+| 元素 | 字型 | 字級 |
+|---|---|---|
+| 封面標題 `Assignment #N` | Arial Bold | 24 |
+| 封面副標 | Arial Unicode（不加粗） | 24 |
+| 大標「一、作業說明」 | Arial Unicode | 20（基線 59pt、下方橫線 69pt） |
+| 小標 `subheading()` | Arial Unicode | 16 |
+| 次小標 `subheading(level=2)` | Arial Unicode | 14 |
+| 內文、條列、表格 | Arial Unicode | 12（表格字色 #003d9e） |
+| 圖說 | Arial Unicode | 10 |
+| 頁碼（封面算第 1 頁但不印） | Arial Regular | 9，#616161 |
+
+全部純黑，**沒有黑體中黑（STHeiti）**——A1 的「粗」標題其實是放大的 Arial Unicode。
+`subheading` 用法：區塊層級（目的、資料集、任務需求、主要發現、驗收項目對照、繳交內容）用
+預設 16pt；數學觀念的 1.～5. 條目、結果頁內的「結論／觀察／關鍵限制」等用 `level=2`。
+
+共用模組在 `lecture/report_style.py`，用 matplotlib PdfPages 繪製。`build_report.py` 照這個骨架寫：
 
 ```python
 sys.path.insert(0, str(ASSIGNMENT_DIR.parent.parent))   # lecture/
@@ -94,8 +114,11 @@ report.mono(分類報告之類的等寬文字)
 report.save(輸出路徑)
 ```
 
-頁面結構慣例（約 8–9 頁）：封面 / 一、作業說明 / 二、數學觀念 / 三、訓練與評估流程 /
-四～七、各項預期結果 / 八、總結（含驗收項目對照表與主要發現）。
+頁面結構慣例（約 8–12 頁）：封面 / 一、作業說明 / 二、數學觀念 / 三、訓練與評估流程 /
+四～七、各項預期結果 / 最後一頁總結。總結頁照 A1：先一段總結文字，再「主要發現」條列
+（有驗收表時放在兩者之間）。
+
+報告改版後**一定要重新打包 zip**——zip 內含報告 PDF，只重產 PDF 會讓繳交檔和 repo 不一致。
 
 **數學式用 mathtext**（`r"$\dfrac{a}{b}$"`）。`report_style.py` 已設定
 `matplotlib.rcParams["mathtext.fontset"] = "cm"`，公式才會以 Computer Modern
@@ -117,11 +140,17 @@ report.save(輸出路徑)
   我們沒在用，**不要照它調整 `.venv`**。
 - **模組檔名以數字開頭不能 import**，測試要用 `importlib.util.spec_from_file_location`
   載入。既有測試檔都有 `load_module()` helper 可抄。
-- **中文字型**：粗體 `/System/Library/Fonts/STHeiti Medium.ttc`，
-  內文 `/System/Library/Fonts/Supplemental/Arial Unicode.ttf`。
+- **字型**：全在 `/System/Library/Fonts/Supplemental/`——`Arial Unicode.ttf`（內文與標題）、
+  `Arial Bold.ttf`（只用在封面標題）、`Arial.ttf`（只用在頁碼）。不要再用 STHeiti。
+- **`report_style.py` 設了 `pdf.fonttype = 42`，不要拿掉**。matplotlib 預設的 Type 3
+  內嵌沒有 ToUnicode，中文抽不出文字，字型測試會找不到任何中文 span。42 會做子集化，
+  檔案不會變大。
 - **matplotlib 會噴一堆 PyparsingDeprecationWarning**，是環境問題不是程式問題，
   跑測試時過濾掉即可，不用去修。
 - 虛擬環境在 `.venv/`，用 `.venv/bin/python`。沒有 pytest，用 `python -m unittest`。
+  新 clone 沒有 `.venv` 時，系統 python3 太新（3.14）不能用，以 uv 重建：
+  `~/.local/bin/uv venv --python 3.9 .venv && ~/.local/bin/uv pip install --python .venv/bin/python
+  numpy==1.26.4 scipy==1.13.1 scikit-learn==1.0.2 matplotlib==3.5.3 "pandas<2" joblib pymupdf`
 
 ## 提交前驗證
 
@@ -131,7 +160,8 @@ report.save(輸出路徑)
 - [ ] 突變檢測：故意改壞關鍵常數與邏輯，確認測試會失敗
 - [ ] 解壓繳交 zip 到**乾淨的暫存目錄**直接執行，確認不依賴任何未繳交的檔案
 - [ ] 報告 PDF 逐頁用 Read 渲染檢查，特別注意公式重疊與行首標點
-- [ ] 比對三份報告內嵌的字型，確認風格真的一致（版面對了不代表字型對了）：
+- [ ] `cd lecture && python -m unittest test_report_style` 通過（鎖住 A1 的字型、字級、顏色、頁碼）
+- [ ] 比對各份報告內嵌的字型，確認風格真的一致（版面對了不代表字型對了）：
 
       ```bash
       .venv/bin/python -c "
@@ -142,8 +172,12 @@ report.save(輸出路徑)
       "
       ```
 
-      三份都應該出現 `Cmr10` / `Cmmi10` / `Cmsy10`（數學式）與 `STHeitiTC-Medium`（粗體中文）。
-      若看到 `DejaVuSans-Oblique`，表示 mathtext 字型設定沒生效。
+      A2 之後的報告應出現 `ArialUnicodeMS`、`Arial-BoldMT`、`ArialMT` 與 `Cm*`（數學式），
+      **不應出現任何 `Heiti`**。A1 本身因為是後製版，會顯示成 `Arial` 與殘留的隱藏
+      `STHeitiTC-Medium`，那是正常的，不要拿它當新報告的期望值。若看到
+      `DejaVuSans-Oblique`，表示 mathtext 字型設定沒生效（`DejaVuSansMono` 是 `mono()`
+      的分類報告，屬正常）。沒有 fitz 時可改用 `pdffonts <pdf>`。
+      **只檢查字型名稱不夠**——A2 曾經字型名稱檢查通過、字級卻全錯，所以一定要跑上一項的測試。
 - [ ] `verification_checklist.md` 寫入實際數值，而非「已完成」
 
 ## Commit

@@ -114,5 +114,96 @@ class MathRenderingTests(unittest.TestCase):
         )
 
 
+def render_spans(report):
+    """把報告存成 PDF，回傳 [(頁碼, 字型名稱, 字級, 顏色, 文字), ...]。"""
+    import tempfile
+
+    import fitz
+
+    spans = []
+    with tempfile.TemporaryDirectory() as directory:
+        output = Path(directory) / "spans.pdf"
+        report.save(output)
+        document = fitz.open(output)
+        for page_index, page in enumerate(document):
+            for block in page.get_text("dict")["blocks"]:
+                for line in block.get("lines", []):
+                    for span in line["spans"]:
+                        if span["text"].strip():
+                            spans.append((
+                                page_index + 1,
+                                span["font"].split("+")[-1],
+                                round(span["size"], 1),
+                                span["color"],
+                                span["text"],
+                            ))
+        document.close()
+    return spans
+
+
+def find_span(spans, text):
+    matches = [span for span in spans if text in span[4]]
+    if not matches:
+        raise AssertionError(f"PDF 中找不到 {text!r}；實際文字：{[s[4] for s in spans]}")
+    return matches[0]
+
+
+class Assignment1TypographyTests(unittest.TestCase):
+    """數值取自已繳交的 Assignment #1 報告（字體調整版，commit 77ecd01）。
+
+    版面結構對了不代表字體對了：A2 曾經以黑體中黑繪製標題、內文 10.5 pt，
+    肉眼一看就和 A1 不同，但「有 Cmr10 與 STHeiti」的字型檢查照樣通過。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        report = report_style.Report()
+        report.cover(
+            "Assignment #9", "測試副標題", "機器學習實作系列　第 9 週：測試",
+            "姓名：測試", ["資料集：test.csv"],
+        )
+        report.page("一、作業說明")
+        report.subheading("目的")
+        report.subheading("1. 次要標題", level=2)
+        report.text("內文 Body text")
+        report.table(["欄位"], [("表格內容",)], [1.0])
+        cls.spans = render_spans(report)
+
+    def test_cover_title_uses_real_arial_bold(self):
+        _, font, size, _, _ = find_span(self.spans, "Assignment")
+        self.assertEqual(font, "Arial-BoldMT")
+        self.assertEqual(size, 24.0)
+
+    def test_cover_subtitle_matches_title_size_in_regular_weight(self):
+        _, font, size, _, _ = find_span(self.spans, "測試副標題")
+        self.assertEqual(font, "ArialUnicodeMS")
+        self.assertEqual(size, 24.0)
+
+    def test_heading_sizes_follow_assignment1(self):
+        expected = {"一、作業說明": 20.0, "目的": 16.0, "1. 次要標題": 14.0, "內文 Body text": 12.0}
+        for text, size in expected.items():
+            with self.subTest(text=text):
+                _, font, actual, color, _ = find_span(self.spans, text)
+                self.assertEqual(font, "ArialUnicodeMS")
+                self.assertEqual(actual, size)
+                self.assertEqual(color, 0x000000)
+
+    def test_no_heiti_font_anywhere(self):
+        # A1 的標題是放大的 Arial Unicode，不是黑體中黑。
+        fonts = {span[1] for span in self.spans}
+        self.assertFalse(any("Heiti" in font for font in fonts), sorted(fonts))
+
+    def test_table_text_is_assignment1_blue(self):
+        _, _, size, color, _ = find_span(self.spans, "表格內容")
+        self.assertEqual(size, 12.0)
+        self.assertEqual(color, 0x003D9E)
+
+    def test_cover_counts_as_page_one(self):
+        # A1 的「一、作業說明」頁碼為 2；封面本身不印頁碼。
+        page_numbers = [s for s in self.spans if s[4].strip().isdigit() and s[2] == 9.0]
+        self.assertEqual([(s[0], s[4]) for s in page_numbers], [(2, "2")])
+        self.assertEqual(page_numbers[0][1], "ArialMT")
+
+
 if __name__ == "__main__":
     unittest.main()

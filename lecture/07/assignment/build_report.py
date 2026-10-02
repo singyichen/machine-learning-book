@@ -82,33 +82,33 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
 
     # --- 二、數學觀念 ---
     report.page("二、數學觀念")
-    report.subheading("1. 多類別 Logistic Regression — Softmax")
+    report.subheading("1. 多類別 Logistic Regression — Softmax", level=2)
     report.math(
         r"$P(y=k \mid \mathbf{x}) = \dfrac{e^{\mathbf{w}_k \cdot \mathbf{x} + b_k}}"
         r"{\sum_{j=0}^{9} e^{\mathbf{w}_j \cdot \mathbf{x} + b_j}}$",
         size=14,
-        space=0.082,
+        space=0.100,
     )
     report.text("10 個類別各有一組權重；預測類別取機率最大者。")
     report.gap(0.026)
-    report.subheading("2. 標準化（Z-score）")
+    report.subheading("2. 標準化（Z-score）", level=2)
     report.math(r"$z = \dfrac{x - \mu}{\sigma}$", size=14, space=0.058)
     report.text("μ、σ 僅以訓練集計算，再套用到測試集，避免資料洩漏。")
     report.gap(0.026)
-    report.subheading("3. 特徵選取 — L1 正則化")
+    report.subheading("3. 特徵選取 — L1 正則化", level=2)
     report.math(r"$\min_{\mathbf{w}} \; C \sum_i L(y_i, \hat{y}_i) + \|\mathbf{w}\|_1$", size=14, space=0.062)
     report.text(
         "L1 懲罰會把不重要像素的權重壓到 0，因此可依各像素的權重大小排序重要性，取前 N 個作為選取結果。"
     )
     report.gap(0.026)
-    report.subheading("4. 交叉熵損失（多類別）")
+    report.subheading("4. 交叉熵損失（多類別）", level=2)
     report.math(
         r"$L = -\dfrac{1}{n}\sum_{i=1}^{n}\sum_{k=0}^{9} y_{ik}\,\log\,P(y=k \mid \mathbf{x}_i)$",
         size=14,
         space=0.072,
     )
     report.gap(0.016)
-    report.subheading("5. 正確率")
+    report.subheading("5. 正確率", level=2)
     report.math(r"$\mathrm{Accuracy} = \dfrac{n_{correct}}{n_{total}}$", size=14, space=0.060)
     report.text("n_correct：預測正確的測試筆數；n_total：測試集總筆數（360）。")
 
@@ -126,7 +126,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "9. 自管線取出特徵選取遮罩，繪製 8 × 8 遮罩圖",
     ])
     report.gap(0.03)
-    report.subheading("關鍵限制")
+    report.subheading("關鍵限制", level=2)
     report.text(
         "測試集全程未參與任何調參，僅在最後評估時使用一次；切分種子固定為 42，"
         "繳交的評估程式才能重現完全相同的測試集，助教執行時不需重新訓練或交叉驗證即可得到一致結果。"
@@ -153,7 +153,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         rows,
         [0.9, 1.5, 1.3, 1.9, 1.4],
     )
-    report.subheading("最佳組合")
+    report.subheading("最佳組合", level=2)
     report.bullets([
         f"selector__max_features = {best['selector__max_features']}",
         f"classifier__C = {best['classifier__C']}",
@@ -188,7 +188,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
     report.page("六、預期結果 2：分類報告")
     report.text(f"測試集共 360 筆，整體正確率（Accuracy）= {accuracy:.4f}，達成 95% 門檻。")
     report.gap(0.03)
-    report.subheading("詳細分類報告（Classification Report）")
+    report.subheading("詳細分類報告（Classification Report）", level=2)
     report.mono(evaluation["report"])
     report.gap(0.03)
     report.text(
@@ -230,7 +230,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "測試集不參與任何設定的挑選。標示 ← 者為繳交版本採用的設定。"
     )
     report.gap(0.026)
-    report.subheading("放寬特徵數量上限的代價")
+    report.subheading("放寬特徵數量上限的代價", level=2)
     report.table(["可用特徵數", "CV 正確率", "標準差"], rows_for("feature_budget"), [2.4, 1.3, 1.3])
     report.text(
         "從 40 個放寬到不受限的 64 個，CV 只提升約 0.4 個百分點；44 個與 40 個更是幾乎相同。"
@@ -238,7 +238,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "並沒有真正限制到模型的能力。"
     )
     report.gap(0.026)
-    report.subheading("換用其他特徵選取方法（皆固定 44 個）")
+    report.subheading("換用其他特徵選取方法（皆固定 44 個）", level=2)
     report.table(["選取方法", "CV 正確率", "標準差"], rows_for("selection_method"), [2.4, 1.3, 1.3])
     report.text(
         "四種方法的差距都在 0.4 個百分點以內，且彼此的標準差互有重疊，"
@@ -247,11 +247,11 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
 
     # --- 九、改善空間討論（二）---
     report.page("九、改善空間討論（二）：超參數與資料擴增")
-    report.subheading("超參數微調")
+    report.subheading("超參數微調", level=2)
     report.table(["設定", "CV 正確率", "標準差"], rows_for("hyperparameter"), [2.4, 1.3, 1.3])
     report.text("正則化強度往兩側調整都沒有帶來提升，顯示目前的設定已接近這個模型的最佳點。")
     report.gap(0.022)
-    report.subheading("資料擴增：在 8 × 8 影像上反而有害")
+    report.subheading("資料擴增：在 8 × 8 影像上反而有害", level=2)
     report.table(["訓練資料", "CV 正確率", "標準差"], rows_for("augmentation"), [2.4, 1.3, 1.3])
     report.text(
         "將影像上下左右各平移 1 像素、訓練資料擴增為 5 倍，正確率大幅下降。"
@@ -262,7 +262,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
 
     # --- 十、改善空間討論（三）---
     report.page("十、改善空間討論（三）：模型上限與最終取捨")
-    report.subheading("真正的瓶頸：線性模型")
+    report.subheading("真正的瓶頸：線性模型", level=2)
     report.table(["分類器（皆只用 40 個像素）", "CV 正確率", "標準差"], rows_for("nonlinear"), [2.4, 1.3, 1.3])
     test_rows = [(t["label"], f"{t['accuracy']:.4f}", f"{t['errors']} 筆") for t in study["test_set"]]
     report.text(
@@ -271,7 +271,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "而非特徵數量或超參數。本作業指定使用 Logistic Regression，故此組僅作為討論對照。"
     )
     report.gap(0.022)
-    report.subheading("為何不採用 CV 較佳的設定")
+    report.subheading("為何不採用 CV 較佳的設定", level=2)
     report.table(["設定", "測試集正確率", "誤判數"], test_rows, [2.8, 1.3, 1.0])
     report.text(
         f"ANOVA F 檢定在交叉驗證上較佳，但在測試集反而多錯一筆。"

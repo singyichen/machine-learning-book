@@ -22,7 +22,7 @@ TDD 的做法請用 `superpowers:test-driven-development`，程式架構看 repo
 
 歷史對照：Assignment #1 → `lecture/02/`，#2 → `lecture/05/`，#3 → `lecture/07/`。
 
-每週資料夾最上層放教授的課堂範例（`NN_*.py` 與資料檔，投影片編號改成週次），`assignment/` 才放作業；範例執行產生的輸出（如 `.pkl`）不進版控。已加入的範例：01、02、03、05（iris.data）、07（`06_1.py` → `07_1.py`，資料 `wdbc_missing.csv`，2026-10-04 補）。第 4、6 週沒有範例程式。
+每週資料夾的結構固定為：最上層放教授的課堂範例（`NN_*.py` 與它讀的資料檔，投影片編號改成週次），`assignment/` 才放作業。範例執行產生的輸出（`.pkl` 等）不進版控。沒有範例程式的週就不建資料夾。
 
 ## 流程
 
@@ -37,13 +37,10 @@ TDD 的做法請用 `superpowers:test-driven-development`，程式架構看 repo
 
 4. **產生圖表與文字結果**，逐張用 Read 目視檢查，確認標題、座標軸、圖例完整。
 
-   **投影片上每一張「預期結果」的圖，都要有一張一對一、同樣式的對應圖**：單線就畫單線、
-   有圓點就加圓點、標題與軸標照抄（如 `Logistic Regression GD`、`Loss (Cross Entropy)`、
-   `x1 [standardized]`）、老師畫在標準化座標就畫標準化座標。多組比較的疊圖可以另外做，
-   但只能當輔助圖放在對應圖下方。A2 原本只交了九線比較圖，使用者比對投影片後問「為什麼不太一樣」——
-   模型其實完全相同（0.693 → 0.065），純粹是畫法不同，之後補了
-   `assignment2_loss_curve_selected.png` 與 `assignment2_decision_boundary_std.png`。
-   寫測試時直接檢查 Axes 的 title／xlabel／ylabel／線條數／marker，不用靠肉眼。
+   **投影片上每一張「預期結果」圖，都要有一張一對一、同樣式的對應圖**：線條數、標記、
+   標題、軸標、座標系（原始單位或標準化）都照投影片。比較用的疊圖可以另外做，但只能當
+   輔助圖放在對應圖下方——使用者會拿投影片逐張比對，模型對了但畫法不同一樣會被問。
+   這類樣式用測試直接檢查 Axes 的 title／xlabel／ylabel／線條數／marker，不靠肉眼。
 
 5. **產生結果報告 PDF**：寫 `build_report.py`，版面共用 `lecture/report_style.py`。
 
@@ -82,7 +79,7 @@ python .claude/skills/ml-course-assignment/scripts/make_submission.py \
   07_assignment3_eval.py digits_pipeline_lr.pkl 515661055_陳欣怡_Assignment3_結果報告.pdf
 ```
 
-**zip 只放教授要的東西**：Python 原始碼、教授附的 CSV 資料檔、結果報告 PDF。程式自己產生的輸出（預測 CSV、PNG、results.txt）不要放——A2 曾把 `assignment2_predictions.csv` 打包進去，使用者看到後問「教授好像沒有規範一定要提供這個檔案」，已移除。
+**zip 只放教授要的東西**：繳交規定列出的程式與模型檔、教授附的資料檔、結果報告 PDF。程式執行時自己產生的輸出（預測 CSV、PNG、results.txt）不放，老師執行程式就會得到。
 
 腳本會印出每個檔案的 UTF-8 旗標供確認。結果報告 PDF 前兩次都有放進 zip，沿用即可
 （題目沒禁止，且方便老師看推導過程）。
@@ -144,17 +141,18 @@ report.save(輸出路徑)
 
 報告數值直接從程式的回傳值帶入，不要手抄，才不會改完程式忘了改報告。
 
-**封面一定要列出課程教授與助教**（課程教授：陳慶永、課程助教：翁宣允），放在姓名／學號的**上一行**（使用者 2026-10-04 糾正過一次：先教授助教、再姓名學號），`cover()` 的 `identity` 傳 list、順序照此。這是使用者 2026-10-04 補的要求，A2、A3 已套用；A1 已繳交且沒有產生器，維持原狀。
+**封面要列出課程教授與助教**（課程教授：陳慶永、課程助教：翁宣允），放在姓名／學號的**上一行**；`cover()` 的 `identity` 傳 list，順序就是版面順序。A1 已繳交且沒有產生器，不回頭補。
 
 **內文、項目符號與表格裡的符號也要用 mathtext**（`$x_1$`、`$|x_1|$`、`$x_1^{2}$`、`$\eta$`），
-不要寫成 `x1`、`abs(x1)`、`x1 ** 2`——使用者明確要求正規寫法。`report_style.wrap_text`
+不要寫成 `x1`、`abs(x1)`、`x1 ** 2`。`report_style.wrap_text`
 會把整段 `$...$` 當成不可拆的 token 並依可見符號估寬，公式裡可以放空格。
 mathtext 不支援 `\big` / `\Big`（會直接拋 `Unknown symbol`），括號要放大用 `\left` / `\right`。
 文字下標用 `\mathrm{}`（`\mu_{\mathrm{train}}`），向量用 `\mathbf{}`，轉置用 `^{\top}`。
 
-**每份報告都要有「改善空間討論」章節**（A1 做了固定／自適應學習率對比，A3 做了三頁），
-做法是另寫 `NN_assignmentM_explore.py`（不繳交）把實驗結果寫成 `assignmentM_improvement_study.json`，
-報告章節從 JSON 帶數字。資料太少無法切驗證集時用留一交叉驗證（A2 只有 15 筆）。
+**每份報告都要有「改善空間討論」章節**，回答「在作業限制內還能做得更好嗎」，並說明最後為何
+維持或更改設定。做法：另寫 `NN_assignmentM_explore.py`（不繳交）把實驗結果寫成
+`assignmentM_improvement_study.json`，報告章節從 JSON 帶數字。泛化能力一律用交叉驗證估計，
+資料少到切不出驗證集時用留一交叉驗證；測試集只能做最後一次確認，不能用來挑設定。
 
 ## 這個環境的地雷
 

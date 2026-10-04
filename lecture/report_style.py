@@ -245,7 +245,11 @@ class Report:
             )
 
     def cover(self, title, subtitle, series, identity, info_lines):
-        """封面算第 1 頁，但和 A1 一樣不印頁碼。"""
+        """封面算第 1 頁，但和 A1 一樣不印頁碼。
+
+        `identity` 可為一行（姓名／學號）或多行（再加「課程教授／課程助教」），
+        同字級排在分隔線下方；`info_lines`（資料集、模型）接在其後。
+        """
         self._new_figure()
         self.page_heading = None
         center = 0.5
@@ -253,9 +257,12 @@ class Report:
         self._write(center, fraction(378), subtitle, SUBTITLE_SIZE, ha="center")
         self._write(center, fraction(446), series, 14, color="#404040", ha="center")
         self._line(x_fraction(149), x_fraction(446), fraction(505), fraction(505), COVER_RULE, 0.6)
-        self._write(center, fraction(558), identity, 14, ha="center")
+        identity_lines = [identity] if isinstance(identity, str) else list(identity)
+        for index, line in enumerate(identity_lines):
+            self._write(center, fraction(558 + 28 * index), line, 14, ha="center")
+        info_top = 594 + 28 * (len(identity_lines) - 1)
         for index, line in enumerate(info_lines):
-            self._write(center, fraction(594 + 32 * index), line, 12, color="#333333", ha="center")
+            self._write(center, fraction(info_top + 32 * index), line, 12, color="#333333", ha="center")
         return self
 
     def page(self, heading):

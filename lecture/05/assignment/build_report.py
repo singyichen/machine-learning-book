@@ -70,7 +70,7 @@ def build(result, study):
         "Assignment #2",
         "Logistic Regression 晶圓驗收分類",
         "機器學習實作系列　第 5 週：Logistic Regression",
-        "姓名：陳欣怡　　學號：515661055",
+        ["姓名：陳欣怡　　學號：515661055", "課程教授：陳慶永　　課程助教：翁宣允"],
         [
             "資料集：wat_train.csv（15 筆）／ wat_test.csv（5 筆）",
             "模型：自行實作 Logistic Regression（未使用 scikit-learn）",

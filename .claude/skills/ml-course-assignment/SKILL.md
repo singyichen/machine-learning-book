@@ -107,7 +107,9 @@ sys.path.insert(0, str(ASSIGNMENT_DIR.parent.parent))   # lecture/
 import report_style
 
 report = report_style.Report(metadata={...})
-report.cover(標題, 副標, 課程週次, "姓名：陳欣怡　　學號：515661055", [資料集, 模型])
+report.cover(標題, 副標, 課程週次,
+             ["姓名：陳欣怡　　學號：515661055", "課程教授：陳慶永　　課程助教：翁宣允"],
+             [資料集, 模型])
 report.page("一、作業說明")
 report.subheading(...); report.text(...); report.bullets([...])
 report.math(r"$...$", size=14, space=0.06)      # space 要依公式高度調
@@ -131,6 +133,8 @@ report.save(輸出路徑)
 渲染檢查。
 
 報告數值直接從程式的回傳值帶入，不要手抄，才不會改完程式忘了改報告。
+
+**封面一定要列出課程教授與助教**（課程教授：陳慶永、課程助教：翁宣允），放在姓名／學號的下一行，`cover()` 的 `identity` 傳 list 即可。這是使用者 2026-10-04 補的要求，A2、A3 已套用；A1 已繳交且沒有產生器，維持原狀。
 
 **內文、項目符號與表格裡的符號也要用 mathtext**（`$x_1$`、`$|x_1|$`、`$x_1^{2}$`、`$\eta$`），
 不要寫成 `x1`、`abs(x1)`、`x1 ** 2`——使用者明確要求正規寫法。`report_style.wrap_text`

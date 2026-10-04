@@ -223,6 +223,35 @@ class Assignment1TypographyTests(unittest.TestCase):
         self.assertEqual(size, 12.0)
         self.assertEqual(color, 0x003D9E)
 
+    def test_cover_accepts_multiple_identity_lines_for_course_staff(self):
+        # 封面要列出課程教授與助教，與姓名／學號同一區塊、同字級，資料集說明仍在其下方。
+        report = report_style.Report()
+        report.cover(
+            "Assignment #9", "測試副標題", "系列",
+            ["姓名：測試　　學號：000", "課程教授：陳慶永　　課程助教：翁宣允"],
+            ["資料集：test.csv"],
+        )
+        spans = render_spans(report)
+        _, name_font, name_size, _, _ = find_span(spans, "姓名：測試")
+        _, staff_font, staff_size, _, _ = find_span(spans, "課程教授：陳慶永")
+        self.assertEqual((staff_font, staff_size), (name_font, name_size))
+
+        import fitz  # 以實際座標確認順序：姓名 → 教授／助教 → 資料集
+        import tempfile
+        report = report_style.Report()
+        report.cover(
+            "Assignment #9", "測試副標題", "系列",
+            ["姓名：測試　　學號：000", "課程教授：陳慶永　　課程助教：翁宣允"],
+            ["資料集：test.csv"],
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "cover.pdf"
+            report.save(output)
+            page = fitz.open(output)[0]
+            tops = {key: page.search_for(key)[0].y0 for key in ("姓名：測試", "課程教授", "資料集：test.csv")}
+        self.assertLess(tops["姓名：測試"], tops["課程教授"])
+        self.assertLess(tops["課程教授"], tops["資料集：test.csv"])
+
     def test_cover_counts_as_page_one(self):
         # A1 的「一、作業說明」頁碼為 2；封面本身不印頁碼。
         page_numbers = [s for s in self.spans if s[4].strip().isdigit() and s[2] == 9.0]

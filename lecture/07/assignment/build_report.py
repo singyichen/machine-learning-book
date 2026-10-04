@@ -47,7 +47,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "Assignment #3",
         "低解析度手寫數字多類別分類",
         "機器學習實作系列　第 7 週：模型選取與模型評估",
-        "姓名：陳欣怡　　學號：515661055",
+        ["姓名：陳欣怡　　學號：515661055", "課程教授：陳慶永　　課程助教：翁宣允"],
         [
             "資料集：sklearn.datasets.load_digits()（1797 張 8×8 灰階影像）",
             "模型：StandardScaler → L1 特徵選取 → Logistic Regression",

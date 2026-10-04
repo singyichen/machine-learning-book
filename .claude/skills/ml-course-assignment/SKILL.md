@@ -37,6 +37,14 @@ TDD 的做法請用 `superpowers:test-driven-development`，程式架構看 repo
 
 4. **產生圖表與文字結果**，逐張用 Read 目視檢查，確認標題、座標軸、圖例完整。
 
+   **投影片上每一張「預期結果」的圖，都要有一張一對一、同樣式的對應圖**：單線就畫單線、
+   有圓點就加圓點、標題與軸標照抄（如 `Logistic Regression GD`、`Loss (Cross Entropy)`、
+   `x1 [standardized]`）、老師畫在標準化座標就畫標準化座標。多組比較的疊圖可以另外做，
+   但只能當輔助圖放在對應圖下方。A2 原本只交了九線比較圖，使用者比對投影片後問「為什麼不太一樣」——
+   模型其實完全相同（0.693 → 0.065），純粹是畫法不同，之後補了
+   `assignment2_loss_curve_selected.png` 與 `assignment2_decision_boundary_std.png`。
+   寫測試時直接檢查 Axes 的 title／xlabel／ylabel／線條數／marker，不用靠肉眼。
+
 5. **產生結果報告 PDF**：寫 `build_report.py`，版面共用 `lecture/report_style.py`。
 
 6. **打包繳交 zip**：用 `scripts/make_submission.py`（見下方）。

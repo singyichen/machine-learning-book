@@ -93,13 +93,20 @@ class Standardizer:
 
 
 class LogisticRegressionGD:
-    """以 full-batch gradient descent 訓練的二元 Logistic Regression。"""
+    """以 full-batch gradient descent 訓練的二元 Logistic Regression。
 
-    def __init__(self, learning_rate=0.1, epochs=1000):
+    `l2` 為 L2 正則化係數 λ（預設 0，即作業繳交版本的無正則化設定）；
+    梯度多加 λ·w／n 這一項，bias 不正則化。`losses_` 記錄的是未含懲罰項的 BCE。
+    """
+
+    def __init__(self, learning_rate=0.1, epochs=1000, l2=0.0):
         if learning_rate <= 0 or epochs <= 0:
             raise ValueError("learning_rate and epochs must be positive")
+        if l2 < 0:
+            raise ValueError("l2 must be non-negative")
         self.learning_rate = float(learning_rate)
         self.epochs = int(epochs)
+        self.l2 = float(l2)
 
     def fit(self, X, y):
         X = np.asarray(X, dtype=float)
@@ -112,7 +119,8 @@ class LogisticRegressionGD:
             probabilities = sigmoid(X @ self.weights_ + self.bias_)
             self.losses_.append(binary_cross_entropy(y, probabilities))
             errors = probabilities - y
-            self.weights_ -= self.learning_rate * (X.T @ errors) / len(y)
+            gradient = (X.T @ errors + self.l2 * self.weights_) / len(y)
+            self.weights_ -= self.learning_rate * gradient
             self.bias_ -= self.learning_rate * errors.mean()
         return self
 

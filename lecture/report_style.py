@@ -15,6 +15,7 @@ STHeiti Medium，英文字母會變成細長的幾何字形，看起來完全不
 """
 
 from pathlib import Path
+import re
 import unicodedata
 
 import matplotlib
@@ -107,8 +108,36 @@ class PageOverflow(RuntimeError):
     """內容超出頁面可用高度。把該頁拆開，或縮減內容。"""
 
 
+MATH_SPAN = re.compile(r"\$[^$]*\$")
+MATH_SCRIPT = re.compile(r"[_^](\{[^}]*\}|\\[A-Za-z]+|.)")
+MATH_MARKUP = re.compile(r"\\[A-Za-z]+|[{}$\s]")
+
+
+def _math_units(span):
+    """估算 mathtext 片段渲染後的寬度。
+
+    `\\dfrac`、`\\mathrm` 這類指令與 `{}` 都不佔版面；上下標縮小排版，
+    每個可見符號約 0.3 欄，其餘可見符號與半形西文相同算 0.5 欄。
+    """
+    scripts = MATH_SCRIPT.findall(span)
+    script_glyphs = sum(max(len(MATH_MARKUP.sub("", part)), 1) for part in scripts)
+    body = MATH_MARKUP.sub("", MATH_SCRIPT.sub("", span))
+    return max(0.5 * len(body) + 0.3 * script_glyphs, 0.5)
+
+
 def text_units(text):
-    """以「全形字 = 1 欄」計算文字寬度；半形字算 0.5 欄。"""
+    """以「全形字 = 1 欄」計算文字寬度；半形字算 0.5 欄，`$...$` 依可見符號估算。"""
+    total = 0.0
+    position = 0
+    for match in MATH_SPAN.finditer(text):
+        total += _plain_units(text[position:match.start()])
+        total += _math_units(match.group())
+        position = match.end()
+    total += _plain_units(text[position:])
+    return total
+
+
+def _plain_units(text):
     total = 0.0
     for char in text:
         if unicodedata.east_asian_width(char) in ("F", "W"):
@@ -129,7 +158,18 @@ def wrap_text(text, max_units):
         # 先切成「可斷行的單位」：CJK 逐字，連續的西文視為一個單字。
         tokens = []
         buffer = ""
-        for char in paragraph:
+        chars = iter(enumerate(paragraph))
+        for index, char in chars:
+            if char == "$" and "$" in paragraph[index + 1:]:
+                # 整段 $...$ 是一個不可拆的 token：拆開會讓 matplotlib 看到單數個 $。
+                if buffer:
+                    tokens.append(buffer)
+                    buffer = ""
+                end = paragraph.index("$", index + 1)
+                tokens.append(paragraph[index:end + 1])
+                for _ in range(end - index):
+                    next(chars)
+                continue
             if unicodedata.east_asian_width(char) in ("F", "W"):
                 if buffer:
                     tokens.append(buffer)

@@ -2,6 +2,7 @@
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+import json
 import tempfile
 import unittest
 
@@ -70,6 +71,24 @@ class LogisticRegressionTests(unittest.TestCase):
 
         np.testing.assert_array_equal(model.predict(X), y.astype(int))
         self.assertLess(model.losses_[-1], model.losses_[0])
+
+    def test_l2_regularization_shrinks_weights_and_defaults_to_off(self):
+        X = np.array([[-2.0, 0.0], [-1.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
+        y = np.array([0.0, 0.0, 1.0, 1.0])
+        make = self.assignment2.LogisticRegressionGD
+
+        plain = make(learning_rate=0.1, epochs=300).fit(X, y)
+        explicit_zero = make(learning_rate=0.1, epochs=300, l2=0.0).fit(X, y)
+        regularized = make(learning_rate=0.1, epochs=300, l2=1.0).fit(X, y)
+
+        np.testing.assert_array_equal(plain.weights_, explicit_zero.weights_)
+        self.assertLess(
+            np.linalg.norm(regularized.weights_), np.linalg.norm(plain.weights_)
+        )
+        # 線性可分資料：無正則化時權重會持續增大、損失趨近 0；有 L2 時停在有限值。
+        self.assertGreater(regularized.losses_[-1], plain.losses_[-1])
+        with self.assertRaises(ValueError):
+            make(learning_rate=0.1, epochs=10, l2=-0.1)
 
 
 class PreprocessingTests(unittest.TestCase):
@@ -147,6 +166,85 @@ class AssignmentPipelineTests(unittest.TestCase):
                 "assignment2_results.txt",
             ):
                 self.assertGreater((Path(first_dir) / filename).stat().st_size, 0)
+
+
+class ImprovementStudyTests(unittest.TestCase):
+    """改善空間研究（05_assignment2_explore.py）必須以繳交版本為基準，數字才有可比性。"""
+
+    def setUp(self):
+        spec = spec_from_file_location(
+            "assignment2_explore", ASSIGNMENT_DIR / "05_assignment2_explore.py"
+        )
+        self.explore = module_from_spec(spec)
+        spec.loader.exec_module(self.explore)
+        self.assignment2 = load_assignment_module()
+        self.train_df, self.test_df = self.assignment2.load_assignment_data(ASSIGNMENT_DIR)
+
+    def test_baseline_configuration_reproduces_submitted_predictions(self):
+        fitted = self.explore.fit_configuration(
+            self.train_df, self.test_df, **self.explore.baseline_config()
+        )
+
+        submitted = self.assignment2.run_assignment(
+            data_dir=ASSIGNMENT_DIR, output_dir=tempfile.mkdtemp()
+        )["predictions"]
+        np.testing.assert_allclose(
+            [fitted["probabilities"][wafer] for wafer in submitted["Wafer ID"]],
+            submitted["Pass Probability"].to_numpy(),
+            atol=1e-12,
+        )
+        self.assertEqual(fitted["training_accuracy"], 1.0)
+
+    def test_combined_feature_set_stacks_abs_and_square_before_x2(self):
+        frame = pd.DataFrame({"x1": [-2.0, 3.0], "x2": [0.5, 1.5]})
+
+        features = self.explore.build_feature_set(frame, "abs+square")
+
+        np.testing.assert_array_equal(features, [[2.0, 4.0, 0.5], [3.0, 9.0, 1.5]])
+
+    def test_leave_one_out_holds_out_each_sample_exactly_once(self):
+        frame = pd.DataFrame(
+            {"x1": [-2.0, -1.0, 1.0, 2.0, 3.0], "x2": [0.1, 0.2, 0.3, 0.4, 0.5], "y": [1, 1, 0, 0, 0]}
+        )
+
+        result = self.explore.leave_one_out(frame, "abs", learning_rate=0.3, epochs=50, l2=0.0)
+
+        self.assertEqual(len(result["held_out_probabilities"]), 5)
+        self.assertTrue(0.0 <= result["accuracy"] <= 1.0)
+        self.assertGreater(result["log_loss"], 0.0)
+
+        # 手算第 3 折：以其餘 4 筆重新標準化並訓練，預測被留下的第 3 筆。
+        # 若實作忘了排除該筆、或沿用全體的標準化統計值，這個值就對不上。
+        rest = frame.drop(index=2)
+        X_rest = self.assignment2.build_features(rest, "abs")
+        scaler = self.assignment2.Standardizer().fit(X_rest)
+        model = self.assignment2.LogisticRegressionGD(0.3, 50).fit(
+            scaler.transform(X_rest), rest["y"].to_numpy()
+        )
+        X_held = self.assignment2.build_features(frame.iloc[[2]], "abs")
+        expected = model.predict_proba(scaler.transform(X_held))[0]
+        self.assertAlmostEqual(result["held_out_probabilities"][2], expected, places=12)
+
+    def test_run_study_writes_every_group_with_one_baseline_each(self):
+        with tempfile.TemporaryDirectory() as directory:
+            study = self.explore.run_study(
+                data_dir=ASSIGNMENT_DIR, output_dir=directory, epochs_scale=0.1
+            )
+            written = json.loads(
+                (Path(directory) / "assignment2_improvement_study.json").read_text("utf-8")
+            )
+
+        self.assertEqual(written["baseline"], self.explore.baseline_config())
+        groups = {row["group"] for row in written["experiments"]}
+        self.assertEqual(groups, {"epochs", "l2", "feature_set"})
+        for group in groups:
+            flags = [row["baseline"] for row in written["experiments"] if row["group"] == group]
+            self.assertEqual(sum(flags), 1, f"group {group} must mark exactly one baseline row")
+        for row in written["experiments"]:
+            self.assertIn("loocv_accuracy", row)
+            self.assertIn("probabilities", row)
+            self.assertEqual(len(row["probabilities"]), 5)
+        self.assertEqual(study["n_train"], 15)
 
 
 if __name__ == "__main__":

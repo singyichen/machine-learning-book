@@ -6,6 +6,8 @@
 binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓預測；另已產生
 結果報告與提交 ZIP。所有核心流程均未使用 scikit-learn。
 
+2026-10-04 補做改善空間研究（留一交叉驗證）：基準設定 LOO 正確率 86.7%，任何 epochs／L2／特徵組合調整都無法改變此數字（誤判的始終是最貼近邊界的兩筆），故繳交版本維持原設定；報告第八、九節記錄這個結論。
+
 ## 這份作業在學什麼
 
 主題是使用手刻的 Logistic Regression 建立晶圓驗收分類器。作業明確要求不使用 scikit-learn。
@@ -42,8 +44,9 @@ binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓
 - `assignment2_decision_boundary.png`：決策邊界與訓練樣本分布圖
 - `assignment2_predictions.csv`：DataFrame 格式的晶圓通過機率與驗收結果
 - `assignment2_results.txt`：特徵／學習率比較與驗收結果文字輸出
-- `515661055_陳欣怡_Assignment2_結果報告.pdf`：八頁結果報告
-- `515661055_陳欣怡_Assignment2.zip`：提交檔案
+- `assignment2_improvement_study.json`：改善空間研究結果（epochs／L2／特徵組合 × 留一交叉驗證）
+- `515661055_陳欣怡_Assignment2_結果報告.pdf`：十頁結果報告（含第八、九節改善空間討論）
+- `515661055_陳欣怡_Assignment2.zip`：提交檔案（.py、兩份題目 CSV、結果報告 PDF；不含程式輸出）
 
 ## 檔案
 
@@ -52,5 +55,6 @@ binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓
 - `wat_test.csv`：5 筆待驗收資料
 - `05_assignment2.py`：完整模型訓練、比較、預測與視覺化程式
 - `test_05_assignment2.py`：資料契約、數學函數、前處理與整體流程測試
-- `build_report.py`：結果報告 PDF 產生器（版面共用 `lecture/report_style.py`）
+- `05_assignment2_explore.py`：改善空間研究（不繳交），結果寫入 JSON 供報告引用
+- `build_report.py`：結果報告 PDF 產生器（版面共用 `lecture/report_style.py`）；內文符號一律以 mathtext `$...$` 書寫
 - `verification_checklist.md`：完成後的逐項驗證紀錄

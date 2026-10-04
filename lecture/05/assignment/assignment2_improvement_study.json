@@ -1,0 +1,519 @@
+{
+  "generated": "2026-10-04",
+  "n_train": 15,
+  "n_test": 5,
+  "wafer_ids": [
+    "Wafer A",
+    "Wafer B",
+    "Wafer C",
+    "Wafer D",
+    "Wafer E"
+  ],
+  "baseline": {
+    "transformation": "abs",
+    "learning_rate": 0.3,
+    "epochs": 1000,
+    "l2": 0.0
+  },
+  "experiments": [
+    {
+      "group": "epochs",
+      "label": "100",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 100,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.14552014799002272,
+      "weight_norm": 3.2916643385809965,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.1942407620414554,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.4803463094006368
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.6073205739464823
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9240357529741252,
+        "Wafer B": 0.13725080878256957,
+        "Wafer C": 0.06395669231436824,
+        "Wafer D": 0.2637754633804758,
+        "Wafer E": 0.9887995192397369
+      }
+    },
+    {
+      "group": "epochs",
+      "label": "300",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 300,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.09474187597828924,
+      "weight_norm": 4.933995861028185,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.16905830087019993,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.3982648294993596
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.6652096153999243
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9756970672595713,
+        "Wafer B": 0.07358324216584698,
+        "Wafer C": 0.01102351946838816,
+        "Wafer D": 0.16668587127545986,
+        "Wafer E": 0.9987042610669026
+      }
+    },
+    {
+      "group": "epochs",
+      "label": "1,000",
+      "baseline": true,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.06476680751476648,
+      "weight_norm": 7.338964393418749,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.20070136239453712,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.28935055789106057
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.7716851187590403
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.996548411601881,
+        "Wafer B": 0.049120766059524465,
+        "Wafer C": 0.0005882932406683865,
+        "Wafer D": 0.09554148667713494,
+        "Wafer E": 0.999955360797112
+      }
+    },
+    {
+      "group": "epochs",
+      "label": "3,000",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 3000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.04210416853807986,
+      "weight_norm": 10.957117670316991,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.26209848080722326,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.20491323636381087
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.866567714747334
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9998545547186856,
+        "Wafer B": 0.0398844817002081,
+        "Wafer C": 6.623306883701079e-06,
+        "Wafer D": 0.04768091639964498,
+        "Wafer E": 0.9999997647057418
+      }
+    },
+    {
+      "group": "epochs",
+      "label": "10,000",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 10000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.01941828889407813,
+      "weight_norm": 17.67567738979854,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.3518053074672249,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.13533682367551889
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.9360888411681291
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9999995766927967,
+        "Wafer B": 0.022203486198621756,
+        "Wafer C": 1.9804516109117984e-09,
+        "Wafer D": 0.01203671781709253,
+        "Wafer E": 0.9999999999855513
+      }
+    },
+    {
+      "group": "l2",
+      "label": "$\\lambda = 0$",
+      "baseline": true,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.06476680751476648,
+      "weight_norm": 7.338964393418749,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.20070136239453712,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.28935055789106057
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.7716851187590403
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.996548411601881,
+        "Wafer B": 0.049120766059524465,
+        "Wafer C": 0.0005882932406683865,
+        "Wafer D": 0.09554148667713494,
+        "Wafer E": 0.999955360797112
+      }
+    },
+    {
+      "group": "l2",
+      "label": "$\\lambda = 0.1$",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.1
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.11190969760860114,
+      "weight_norm": 4.181927733125905,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.18182557965398885,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.380207408581152
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.6244146972939282
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9549653776052213,
+        "Wafer B": 0.092886265411505,
+        "Wafer C": 0.02185548801747996,
+        "Wafer D": 0.19214514793429993,
+        "Wafer E": 0.9961742935759805
+      }
+    },
+    {
+      "group": "l2",
+      "label": "$\\lambda = 1$",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 1.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.2591678331524308,
+      "weight_norm": 1.8039448158846971,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.320885811873341,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.462151633575826
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.5555028562838683
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.7868100205251175,
+        "Wafer B": 0.24745034956631945,
+        "Wafer C": 0.1871044815003147,
+        "Wafer D": 0.3491740628534536,
+        "Wafer E": 0.9163840299565745
+      }
+    },
+    {
+      "group": "l2",
+      "label": "$\\lambda = 10$",
+      "baseline": false,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 10.0
+      },
+      "training_accuracy": 0.9333333333333333,
+      "final_loss": 0.5242004303027807,
+      "weight_norm": 0.45947868117331536,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.5946535540733202,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.4513246450234821
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.5218889185345803
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.5683113796676217,
+        "Wafer B": 0.4138362984833376,
+        "Wafer C": 0.39644743952627914,
+        "Wafer D": 0.4463060613158548,
+        "Wafer E": 0.6347253446791526
+      }
+    },
+    {
+      "group": "feature_set",
+      "label": "$x_1$、$x_2$",
+      "baseline": false,
+      "config": {
+        "transformation": "raw",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.0
+      },
+      "training_accuracy": 0.7333333333333333,
+      "final_loss": 0.49798715656766995,
+      "weight_norm": 1.844680324161051,
+      "loocv_accuracy": 0.6666666666666666,
+      "loocv_log_loss": 1.0684301927902373,
+      "loocv_misclassified": [
+        {
+          "x1": 4.2,
+          "x2": 0.8,
+          "y": 0,
+          "probability": 0.9829714490210049
+        },
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.24909865992426453
+        },
+        {
+          "x1": 3.1,
+          "x2": 1.5,
+          "y": 0,
+          "probability": 0.701018493392546
+        },
+        {
+          "x1": -0.7,
+          "x2": 1.4,
+          "y": 1,
+          "probability": 0.44942726040712067
+        },
+        {
+          "x1": -4.0,
+          "x2": 0.6,
+          "y": 0,
+          "probability": 0.996608761048364
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.6855194423859979,
+        "Wafer B": 0.8731964938062325,
+        "Wafer C": 0.006598967193263196,
+        "Wafer D": 0.3168495328680181,
+        "Wafer E": 0.8086656622480836
+      }
+    },
+    {
+      "group": "feature_set",
+      "label": "$|x_1|$、$x_2$",
+      "baseline": true,
+      "config": {
+        "transformation": "abs",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.06476680751476648,
+      "weight_norm": 7.338964393418749,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.20070136239453712,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.28935055789106057
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.7716851187590403
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.996548411601881,
+        "Wafer B": 0.049120766059524465,
+        "Wafer C": 0.0005882932406683865,
+        "Wafer D": 0.09554148667713494,
+        "Wafer E": 0.999955360797112
+      }
+    },
+    {
+      "group": "feature_set",
+      "label": "$x_1^{2}$、$x_2$",
+      "baseline": false,
+      "config": {
+        "transformation": "square",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.04771098590361893,
+      "weight_norm": 7.5538321872977,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.16958805022365447,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.4928940568947099
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.8033008537086235
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9964766708109305,
+        "Wafer B": 0.00650296715904148,
+        "Wafer C": 2.750735338245087e-05,
+        "Wafer D": 0.22357072001569073,
+        "Wafer E": 0.9997167907493145
+      }
+    },
+    {
+      "group": "feature_set",
+      "label": "$|x_1|$、$x_1^{2}$、$x_2$",
+      "baseline": false,
+      "config": {
+        "transformation": "abs+square",
+        "learning_rate": 0.3,
+        "epochs": 1000,
+        "l2": 0.0
+      },
+      "training_accuracy": 1.0,
+      "final_loss": 0.049819238329167646,
+      "weight_norm": 6.946842489768632,
+      "loocv_accuracy": 0.8666666666666667,
+      "loocv_log_loss": 0.19806202431080833,
+      "loocv_misclassified": [
+        {
+          "x1": 1.5,
+          "x2": 1.8,
+          "y": 1,
+          "probability": 0.37324958466959485
+        },
+        {
+          "x1": -1.0,
+          "x2": 2.5,
+          "y": 0,
+          "probability": 0.8358979762528564
+        }
+      ],
+      "probabilities": {
+        "Wafer A": 0.9977107548210629,
+        "Wafer B": 0.011396331281429351,
+        "Wafer C": 6.31864300206263e-05,
+        "Wafer D": 0.14347981948099092,
+        "Wafer E": 0.9999358024315519
+      }
+    }
+  ]
+}

@@ -65,6 +65,31 @@ class WrapTextTests(unittest.TestCase):
         self.assertEqual(lines, ["第一行", "第二行"])
 
 
+    def test_inline_math_is_never_split_across_lines(self):
+        # 內文裡的 $...$ 交給 mathtext 渲染；若被換行拆開，matplotlib 會因為
+        # 單數個 $ 而直接拋錯，或把公式當成純文字印出來。
+        text = "標準化 $z = \\dfrac{x - \\mu_{\\mathrm{train}}}{\\sigma_{\\mathrm{train}}}$ 的統計值只能由訓練集計算"
+
+        for budget in range(6, 30):
+            lines = report_style.wrap_text(text, max_units=budget)
+            for line in lines:
+                self.assertEqual(
+                    line.count("$") % 2, 0,
+                    f"budget={budget} split a formula: {line!r}",
+                )
+        self.assertIn("$z = ", "".join(lines))
+
+    def test_inline_math_width_counts_visible_glyphs_not_markup(self):
+        # $|x_1|$ 渲染後約一個全形字寬；若照原始字元算成 3.5 欄，
+        # 每行會提早換行、右側留下大片空白。
+        self.assertLess(report_style.text_units("$|x_1|$"), 2.0)
+        self.assertGreater(report_style.text_units("$|x_1|$"), 0.5)
+        self.assertLess(
+            report_style.text_units("$\\mathbf{w}^{\\top}\\mathbf{x}+b$"),
+            report_style.text_units("mathbf{w}^{top}mathbf{x}+b"),
+        )
+
+
 class OverflowGuardTests(unittest.TestCase):
     """內容超出頁面底部時會被靜默裁掉，必須主動報錯而不是默默產出壞頁面。"""
 

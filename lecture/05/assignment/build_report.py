@@ -192,36 +192,57 @@ def build(result, study):
 
     # --- 五、決策邊界視覺化 ---
     report.page("五、決策邊界視覺化")
-    report.text("以最終模型（$|x_1|$、$x_2$、$\\eta = 0.3$）繪製決策邊界。")
-    report.gap(0.02)
+    report.text(
+        "以最終模型（$|x_1|$、$x_2$、$\\eta = 0.3$）繪製決策邊界。"
+        "上圖比照題目預期結果，畫在標準化座標上；下圖換回原始單位，便於對照製程數值。"
+    )
+    report.gap(0.012)
+    report.figure_image(
+        ASSIGNMENT_DIR / "assignment2_decision_boundary_std.png",
+        height=0.31,
+        caption=(
+            "assignment2_decision_boundary_std.png — 標準化座標上的決策區域；"
+            "Class 0 為 Fail、Class 1 為 Pass，15 筆訓練樣本皆位於正確區域。"
+        ),
+    )
+    report.gap(0.006)
     report.figure_image(
         ASSIGNMENT_DIR / "assignment2_decision_boundary.png",
-        height=0.48,
+        height=0.31,
         caption=(
-            "assignment2_decision_boundary.png — 使用 $|x_1|$ 與 $x_2$ 的決策邊界。"
-            "藍色區域預測為 Pass、紅色區域預測為 Fail；"
-            "15 筆訓練樣本皆位於正確區域，訓練正確率為 100%。"
+            "assignment2_decision_boundary.png — 同一模型在 $|x_1|$（Å）與 $x_2$（ppm）原始單位上的決策邊界，"
+            "訓練正確率 100%。"
         ),
     )
 
     # --- 六、Loss 收斂曲線 ---
-    report.page("六、Loss 收斂曲線")
-    report.text("九組特徵轉換／學習率組合的 binary cross-entropy 隨 epoch 變化。")
-    report.gap(0.02)
+    selected_final = comparison[
+        (comparison["Feature Transformation"] == "abs") & (comparison["Learning Rate"] == 0.3)
+    ]["Final Loss"].iloc[0]
     raw_final = comparison[comparison["Feature Transformation"] == "raw"]["Final Loss"].min()
+    report.page("六、Loss 收斂曲線")
+    report.text(
+        "上圖為最終模型的 binary cross-entropy 隨 epoch 變化（比照題目預期結果）；"
+        "下圖疊上九組特徵轉換／學習率組合，作為第四節比較的輔助。"
+    )
+    report.gap(0.012)
     report.figure_image(
-        ASSIGNMENT_DIR / "assignment2_loss_curves.png",
-        height=0.44,
+        ASSIGNMENT_DIR / "assignment2_loss_curve_selected.png",
+        height=0.31,
         caption=(
-            f"assignment2_loss_curves.png — 原始 $x_1$ 最終停留在約 {raw_final:.3f}；"
-            "$|x_1|$ 與 $x_1^{2}$ 的 loss 持續下降。$\\eta = 0.3$ 在本資料上收斂最快。"
+            f"assignment2_loss_curve_selected.png — 最終模型由 0.693 收斂至 {selected_final:.4f}，"
+            "前 100 個 epoch 下降最快，之後平緩。"
         ),
     )
-    report.gap(0.016)
-    report.subheading("觀察", level=2)
-    report.text(
-        "Loss 曲線可確認訓練是否收斂，但只有訓練資料，無法據此判斷過擬合或泛化能力；"
-        "第八、九節以留一交叉驗證補做這項檢驗。"
+    report.gap(0.006)
+    report.figure_image(
+        ASSIGNMENT_DIR / "assignment2_loss_curves.png",
+        height=0.31,
+        caption=(
+            f"assignment2_loss_curves.png — 原始 $x_1$ 最終停留在約 {raw_final:.3f}；"
+            "$|x_1|$ 與 $x_1^{2}$ 持續下降，$\\eta = 0.3$ 收斂最快。"
+            "Loss 只能確認收斂，無法判斷泛化能力，第八、九節以留一交叉驗證補做檢驗。"
+        ),
     )
 
     # --- 七、待驗收結果 ---

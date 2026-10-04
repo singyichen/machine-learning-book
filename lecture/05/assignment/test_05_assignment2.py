@@ -161,11 +161,48 @@ class AssignmentPipelineTests(unittest.TestCase):
 
             for filename in (
                 "assignment2_loss_curves.png",
+                "assignment2_loss_curve_selected.png",
                 "assignment2_decision_boundary.png",
+                "assignment2_decision_boundary_std.png",
                 "assignment2_predictions.csv",
                 "assignment2_results.txt",
             ):
                 self.assertGreater((Path(first_dir) / filename).stat().st_size, 0)
+
+    def test_selected_model_figures_follow_the_reference_style(self):
+        # 老師的預期結果：單一曲線加圓點（Logistic Regression GD / Loss (Cross Entropy)），
+        # 決策邊界畫在標準化座標上。用 Agg 畫到記憶體檢查軸標與線條，不用看圖。
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        train_df, _ = self.assignment2.load_assignment_data(ASSIGNMENT_DIR)
+        _, runs = self.assignment2.compare_training_options(
+            train_df, transformations=("abs",), learning_rates=(0.3,), epochs=50
+        )
+        run = runs[("abs", 0.3)]
+        with tempfile.TemporaryDirectory() as directory:
+            fig_loss = self.assignment2._plot_selected_loss_curve(
+                run["model"], Path(directory) / "loss.png"
+            )
+            fig_boundary = self.assignment2._plot_decision_boundary_standardized(
+                run["X_std"], train_df["y"].to_numpy(), run["model"],
+                Path(directory) / "boundary.png",
+            )
+        ax = fig_loss.axes[0]
+        self.assertEqual(ax.get_title(), "Logistic Regression GD")
+        self.assertEqual(ax.get_ylabel(), "Loss (Cross Entropy)")
+        self.assertEqual(len(ax.lines), 1)
+        self.assertEqual(ax.lines[0].get_marker(), "o")
+        np.testing.assert_allclose(ax.lines[0].get_ydata(), run["model"].losses_)
+
+        ax = fig_boundary.axes[0]
+        self.assertEqual(ax.get_title(), "Logistic Regression GD")
+        self.assertEqual(ax.get_xlabel(), "x1 [standardized]")
+        self.assertEqual(ax.get_ylabel(), "x2 [standardized]")
+        self.assertEqual([h.get_label() for h in ax.collections if h.get_label().startswith("Class")],
+                         ["Class 0", "Class 1"])
+        plt.close("all")
 
 
 class ImprovementStudyTests(unittest.TestCase):

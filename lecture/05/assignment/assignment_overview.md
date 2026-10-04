@@ -40,8 +40,10 @@ binary cross-entropy、梯度下降、學習率比較、圖表與待驗收晶圓
 
 ## 預計輸出
 
-- `assignment2_loss_curves.png`：九組特徵轉換／學習率的訓練損失曲線
-- `assignment2_decision_boundary.png`：決策邊界與訓練樣本分布圖
+- `assignment2_loss_curve_selected.png`：最終模型的單一 loss 曲線（比照題目預期結果，單線加圓點）
+- `assignment2_loss_curves.png`：九組特徵轉換／學習率的訓練損失曲線（輔助比較）
+- `assignment2_decision_boundary_std.png`：標準化座標上的決策邊界（比照題目預期結果）
+- `assignment2_decision_boundary.png`：原始單位上的決策邊界與訓練樣本分布圖
 - `assignment2_predictions.csv`：DataFrame 格式的晶圓通過機率與驗收結果
 - `assignment2_results.txt`：特徵／學習率比較與驗收結果文字輸出
 - `assignment2_improvement_study.json`：改善空間研究結果（epochs／L2／特徵組合 × 留一交叉驗證）

@@ -198,6 +198,51 @@ def _plot_loss_curves(comparison, runs, output_path):
     plt.close(fig)
 
 
+def _plot_selected_loss_curve(model, output_path):
+    """最終模型的單一 loss 曲線，樣式比照題目投影片的預期結果（單線加圓點）。"""
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(
+        range(1, len(model.losses_) + 1),
+        model.losses_,
+        marker="o",
+        markersize=4,
+        linewidth=1.2,
+        color="#2f6fb0",
+    )
+    ax.set_xlabel("Epochs")
+    ax.set_ylabel("Loss (Cross Entropy)")
+    ax.set_title("Logistic Regression GD")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=200)
+    return fig
+
+
+def _plot_decision_boundary_standardized(X_std, y, model, output_path):
+    """在標準化座標上繪製決策區域與訓練樣本，樣式比照題目投影片的預期結果。"""
+    y = np.asarray(y, dtype=int)
+    x1_grid, x2_grid = np.meshgrid(
+        np.linspace(X_std[:, 0].min() - 0.5, X_std[:, 0].max() + 0.5, 300),
+        np.linspace(X_std[:, 1].min() - 0.5, X_std[:, 1].max() + 0.5, 300),
+    )
+    grid = np.column_stack((x1_grid.ravel(), x2_grid.ravel()))
+    regions = model.predict(grid).reshape(x1_grid.shape)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.contourf(x1_grid, x2_grid, regions, alpha=0.4, cmap=ListedColormap(("#f08080", "#6f8fe0")))
+    styles = {0: ("#c0392b", "o", "Class 0"), 1: ("#1f3a93", "s", "Class 1")}
+    for label, (color, marker, name) in styles.items():
+        mask = y == label
+        ax.scatter(X_std[mask, 0], X_std[mask, 1], color=color, marker=marker,
+                   edgecolor="black", s=40, label=name)
+    ax.set_xlabel("x1 [standardized]")
+    ax.set_ylabel("x2 [standardized]")
+    ax.set_title("Logistic Regression GD")
+    ax.legend(loc="upper left")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=200)
+    return fig
+
+
 def _plot_decision_boundary(train_df, model, scaler, output_path):
     """在 abs(x1)-x2 原始單位平面繪製模型的決策區域。"""
     X = build_features(train_df, "abs")
@@ -292,6 +337,19 @@ def run_assignment(data_dir=None, output_dir=None, epochs=1000):
         selected["model"],
         selected["scaler"],
         destination / "assignment2_decision_boundary.png",
+    )
+    plt.close(
+        _plot_selected_loss_curve(
+            selected["model"], destination / "assignment2_loss_curve_selected.png"
+        )
+    )
+    plt.close(
+        _plot_decision_boundary_standardized(
+            selected["X_std"],
+            train_df["y"].to_numpy(),
+            selected["model"],
+            destination / "assignment2_decision_boundary_std.png",
+        )
     )
     predictions.to_csv(destination / "assignment2_predictions.csv", index=False)
     report_text = _format_results(comparison, predictions)

@@ -67,7 +67,7 @@
 
 ## 九、繳交檔重新驗證（2026-10-04）
 
-- [x] 封面補列「課程教授：陳慶永　　課程助教：翁宣允」（姓名／學號下一行，14 pt），A2、A3 報告與 zip 同步重建
+- [x] 封面補列「課程教授：陳慶永　　課程助教：翁宣允」（姓名／學號上一行，14 pt），A2、A3 報告與 zip 同步重建
 
 - [x] zip 重新打包為 4 個檔案：05_assignment2.py、wat_train.csv、wat_test.csv、結果報告 PDF（PDF 檔名 UTF-8 旗標：是）。移除 assignment2_predictions.csv——教授規定只有「.py 與 CSV 資料檔」，預測 CSV 是程式執行時自動產生的輸出
 - [x] 解壓至乾淨暫存目錄執行 `05_assignment2.py`：exit 0，五筆機率與 repo 內 CSV 完全相同

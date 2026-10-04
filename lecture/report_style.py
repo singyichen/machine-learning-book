@@ -247,7 +247,7 @@ class Report:
     def cover(self, title, subtitle, series, identity, info_lines):
         """封面算第 1 頁，但和 A1 一樣不印頁碼。
 
-        `identity` 可為一行（姓名／學號）或多行（再加「課程教授／課程助教」），
+        `identity` 可為一行（姓名／學號）或多行（「課程教授／課程助教」在前、姓名／學號在後），
         同字級排在分隔線下方；`info_lines`（資料集、模型）接在其後。
         """
         self._new_figure()

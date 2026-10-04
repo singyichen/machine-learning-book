@@ -22,6 +22,8 @@ TDD 的做法請用 `superpowers:test-driven-development`，程式架構看 repo
 
 歷史對照：Assignment #1 → `lecture/02/`，#2 → `lecture/05/`，#3 → `lecture/07/`。
 
+每週資料夾最上層放教授的課堂範例（`NN_*.py` 與資料檔，投影片編號改成週次），`assignment/` 才放作業；範例執行產生的輸出（如 `.pkl`）不進版控。已加入的範例：01、02、03、05（iris.data）、07（`06_1.py` → `07_1.py`，資料 `wdbc_missing.csv`，2026-10-04 補）。第 4、6 週沒有範例程式。
+
 ## 流程
 
 1. **讀題目 PDF**。用 Read 工具搭配 `pages` 參數逐頁看圖，別只抽文字——題目的

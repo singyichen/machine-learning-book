@@ -261,7 +261,7 @@ class EvaluationTests(unittest.TestCase):
             [33, 28, 33, 34, 46, 47, 35, 34, 30, 40],
         )
 
-    def test_run_evaluation_writes_both_required_figures_and_the_text_report(self):
+    def test_run_evaluation_writes_all_three_required_figures_and_the_text_report(self):
         with tempfile.TemporaryDirectory() as output_dir:
             result = self.evaluation.run_evaluation(
                 model_path=self.model_path, output_dir=output_dir
@@ -270,6 +270,7 @@ class EvaluationTests(unittest.TestCase):
             for filename in (
                 "assignment3_feature_mask.png",
                 "assignment3_confusion_matrix.png",
+                "assignment3_misclassified.png",
                 "assignment3_results.txt",
             ):
                 self.assertGreater((Path(output_dir) / filename).stat().st_size, 0)
@@ -277,6 +278,88 @@ class EvaluationTests(unittest.TestCase):
             report = (Path(output_dir) / "assignment3_results.txt").read_text(encoding="utf-8")
             self.assertIn(f"{result['accuracy']:.2f}", report)
             self.assertLessEqual(int(result["feature_mask"].sum()), 44)
+            self.assertIn(
+                self.evaluation.misclassified_message(len(result["misclassified"])), report
+            )
+
+
+class ExpectedFigureStyleTests(unittest.TestCase):
+    """投影片 p.59–61 的預期結果圖要一對一、同樣式，助教會逐張比對。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.evaluation = load_eval_module()
+        model = cls.evaluation.load_model(trained_model_path())
+        cls.X_test, cls.y_test = cls.evaluation.load_test_set()
+        cls.result = cls.evaluation.evaluate(model, cls.X_test, cls.y_test)
+        cls.mask = cls.evaluation.extract_feature_mask(model)
+
+    def tearDown(self):
+        import matplotlib.pyplot as plt
+
+        plt.close("all")
+
+    def test_mask_figure_shows_every_cell_value_under_the_ratio_title_without_axes(self):
+        fig = self.evaluation.make_feature_mask_figure(self.mask)
+        ax = fig.axes[0]
+
+        self.assertEqual(ax.get_title(), self.evaluation.feature_mask_title(self.mask))
+        self.assertEqual(sorted(t.get_text() for t in ax.texts), sorted(
+            str(v) for v in self.mask.astype(int)
+        ))
+        # 投影片的遮罩圖沒有刻度與座標軸標籤。
+        self.assertFalse(ax.axison)
+
+    def test_confusion_figure_labels_all_100_cells_including_zeros_with_no_title(self):
+        matrix = self.result["confusion_matrix"]
+
+        fig = self.evaluation.make_confusion_matrix_figure(matrix)
+        ax = fig.axes[0]
+
+        self.assertEqual(ax.get_title(), "")
+        self.assertEqual(ax.get_xlabel(), "Predicted label")
+        self.assertEqual(ax.get_ylabel(), "True label")
+        self.assertEqual(sorted(int(t.get_text()) for t in ax.texts), sorted(matrix.ravel()))
+
+    def test_misclassified_indices_are_exactly_the_wrong_predictions(self):
+        y_pred = self.result["y_pred"]
+
+        indices = self.evaluation.find_misclassified(self.y_test, y_pred)
+
+        np.testing.assert_array_equal(indices, np.flatnonzero(y_pred != self.y_test))
+        np.testing.assert_array_equal(self.result["misclassified"], indices)
+
+    def test_misclassified_count_matches_the_confusion_matrix_off_diagonal(self):
+        matrix = self.result["confusion_matrix"]
+
+        off_diagonal = int(matrix.sum() - np.trace(matrix))
+
+        self.assertEqual(len(self.result["misclassified"]), off_diagonal)
+        self.assertEqual(
+            self.evaluation.misclassified_message(off_diagonal),
+            f"測試集總共誤判了 {off_diagonal} 張圖片。",
+        )
+
+    def test_misclassified_figure_titles_true_label_and_marks_prediction_in_red(self):
+        from matplotlib.colors import to_rgba
+
+        indices = self.result["misclassified"]
+        y_pred = self.result["y_pred"]
+
+        fig = self.evaluation.make_misclassified_figure(self.X_test, self.y_test, y_pred, indices)
+        shown = [ax for ax in fig.axes if ax.images]
+
+        self.assertEqual(len(shown), len(indices))
+        for ax, index in zip(shown, indices):
+            self.assertEqual(ax.get_title(), f"True: {self.y_test[index]}")
+            self.assertEqual(ax.images[0].get_array().shape, (8, 8))
+            [label] = ax.texts
+            self.assertEqual(label.get_text(), str(y_pred[index]))
+            self.assertEqual(to_rgba(label.get_color()), to_rgba("red"))
+        # 投影片為每列 5 張；誤判超過 5 張就要換列。
+        rows, columns = shown[0].get_subplotspec().get_gridspec().get_geometry()
+        self.assertEqual(columns, 5)
+        self.assertEqual(rows, -(-len(indices) // 5))
 
 
 if __name__ == "__main__":

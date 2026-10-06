@@ -28,7 +28,8 @@ def load_module(filename, name):
     return module
 
 
-def build(training, evaluation, study, mask_figure, confusion_figure):
+def build(training, evaluation, study, mask_figure, confusion_figure, misclassified_figure,
+          misclassified_message):
     selected = int(training["selected_pixels"])
     dropped = 64 - selected
     accuracy = evaluation["accuracy"]
@@ -79,6 +80,13 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "在測試集（約 360 筆樣本）上的整體正確率（Accuracy）達 95% 以上",
         "使用 joblib.dump() 將訓練好的最佳模型（指管線）儲存成檔案",
     ])
+    report.gap(0.022)
+    report.subheading("預期結果")
+    report.bullets([
+        "1. 視覺化特徵選取遮罩（0：淘汰、1：選取），標題含選取比例",
+        "2. 輸出測試集的分類報告，並視覺化呈現混淆矩陣",
+        "3. 輸出誤判的樣本總數，繪出所有誤判樣本並標示真實標籤與預測結果",
+    ])
 
     # --- 二、數學觀念 ---
     report.page("二、數學觀念")
@@ -124,6 +132,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "7. joblib.dump() 儲存整條 Pipeline（含 scaler 與 selector）",
         "8. 評估程式重建相同測試集，載入模型輸出分類報告與混淆矩陣",
         "9. 自管線取出特徵選取遮罩，繪製 8 × 8 遮罩圖",
+        "10. 比對預測與真實標籤找出所有誤判樣本，輸出總數並逐張繪出",
     ])
     report.gap(0.03)
     report.subheading("關鍵限制", level=2)
@@ -213,7 +222,34 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         ),
     )
 
-    # --- 八、改善空間討論（一）---
+    # --- 八、預期結果 3：誤判樣本 ---
+    misclassified = evaluation["misclassified"]
+    y_pred = evaluation["y_pred"]
+    y_test = evaluation["y_test"]
+    report.page("八、預期結果 3：誤判樣本")
+    report.text(
+        f"評估程式輸出：「{misclassified_message}」"
+        "下圖繪出所有誤判樣本：每張圖上方的 True 為真實標籤，左下角紅字為模型的預測結果。"
+    )
+    report.gap(0.02)
+    report.figure_image(
+        misclassified_figure,
+        height=0.25,
+        caption=(
+            f"assignment3_misclassified.png — 共 {len(misclassified)} 張，"
+            "與混淆矩陣非對角線的總和一致。"
+        ),
+    )
+    report.gap(0.01)
+    pair_rows = [
+        (str(i + 1), str(int(y_test[index])), str(int(y_pred[index])),
+         str(int(confusion[y_test[index], y_pred[index]])))
+        for i, index in enumerate(misclassified)
+    ]
+    report.subheading("與混淆矩陣對應", level=2)
+    report.table(["順序", "真實標籤", "預測結果", "混淆矩陣該格計數"], pair_rows, [0.9, 1.3, 1.3, 2.0])
+
+    # --- 九、改善空間討論（一）---
     def rows_for(group):
         return [
             (
@@ -224,7 +260,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
             for e in study["experiments"] if e["group"] == group
         ]
 
-    report.page("八、改善空間討論（一）：特徵數量與選取方法")
+    report.page("九、改善空間討論（一）：特徵數量與選取方法")
     report.text(
         f"以下比較皆在訓練集（{study['n_train']} 筆）上以 {study['cv_folds']}-fold 交叉驗證進行，"
         "測試集不參與任何設定的挑選。標示 ← 者為繳交版本採用的設定。"
@@ -245,8 +281,8 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "難以判定何者確實較優。"
     )
 
-    # --- 九、改善空間討論（二）---
-    report.page("九、改善空間討論（二）：超參數與資料擴增")
+    # --- 十、改善空間討論（二）---
+    report.page("十、改善空間討論（二）：超參數與資料擴增")
     report.subheading("超參數微調", level=2)
     report.table(["設定", "CV 正確率", "標準差"], rows_for("hyperparameter"), [2.4, 1.3, 1.3])
     report.text("正則化強度往兩側調整都沒有帶來提升，顯示目前的設定已接近這個模型的最佳點。")
@@ -260,8 +296,8 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "技巧是否適用取決於資料本身的性質。"
     )
 
-    # --- 十、改善空間討論（三）---
-    report.page("十、改善空間討論（三）：模型上限與最終取捨")
+    # --- 十一、改善空間討論（三）---
+    report.page("十一、改善空間討論（三）：模型上限與最終取捨")
     report.subheading("真正的瓶頸：線性模型", level=2)
     report.table(["分類器（皆只用 40 個像素）", "CV 正確率", "標準差"], rows_for("nonlinear"), [2.4, 1.3, 1.3])
     test_rows = [(t["label"], f"{t['accuracy']:.4f}", f"{t['errors']} 筆") for t in study["test_set"]]
@@ -281,8 +317,8 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
         "因此最終維持以交叉驗證選出的原設定不變。"
     )
 
-    # --- 十一、總結 ---
-    report.page("十一、總結")
+    # --- 十二、總結 ---
+    report.page("十二、總結")
     report.text(
         "本作業以 scikit-learn 建立低解析度手寫數字的多類別分類器，"
         "完成資料切分、特徵縮放、L1 特徵選取、交叉驗證模型選取與模型評估，"
@@ -297,6 +333,7 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
             ("使用像素數", "≤ 44 個", f"{selected} 個"),
             ("測試集正確率", "≥ 95%", f"{accuracy * 100:.2f}%"),
             ("測試集樣本數", "約 360 筆", "360 筆"),
+            ("誤判樣本", "總數與圖須對應混淆矩陣", f"{len(misclassified)} 張，一致"),
             ("模型儲存", "joblib.dump() 管線", "digits_pipeline_lr.pkl"),
         ],
         [1.5, 1.6, 1.9],
@@ -305,8 +342,9 @@ def build(training, evaluation, study, mask_figure, confusion_figure):
     report.bullets([
         f"僅用 {selected} 個像素（淘汰 {dropped} 個）即達成 {accuracy * 100:.2f}% 測試正確率，高於 95% 門檻",
         "被淘汰的像素全部落在影像邊緣，與手寫數字的背景區域吻合",
+        f"360 筆測試樣本僅誤判 {len(misclassified)} 張，且分散在不同數字組合，沒有集中的系統性混淆",
         "40 與 44 個像素的交叉驗證表現相同，放寬到 64 個也只多 0.4 個百分點",
-        "改用 RBF 核 SVM 可達 0.9896，顯示瓶頸在線性決策邊界而非特徵數量（詳見第八至十節）",
+        "改用 RBF 核 SVM 可達 0.9896，顯示瓶頸在線性決策邊界而非特徵數量（詳見第九至十一節）",
         "繳交的評估程式不含任何訓練或模型選取程式碼，助教可直接執行批閱",
     ])
     report.gap(0.024)
@@ -334,6 +372,7 @@ def main():
     evaluation = eval_module.run_evaluation(
         model_path=training["model_path"], output_dir=ASSIGNMENT_DIR
     )
+    _, evaluation["y_test"] = eval_module.load_test_set()
 
     report = build(
         training,
@@ -341,6 +380,8 @@ def main():
         study,
         ASSIGNMENT_DIR / eval_module.MASK_FIGURE,
         ASSIGNMENT_DIR / eval_module.CONFUSION_FIGURE,
+        ASSIGNMENT_DIR / eval_module.MISCLASSIFIED_FIGURE,
+        eval_module.misclassified_message(len(evaluation["misclassified"])),
     )
     output_path = report.save(ASSIGNMENT_DIR / REPORT_NAME)
     size_mb = output_path.stat().st_size / 1024 / 1024

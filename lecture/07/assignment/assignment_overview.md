@@ -3,7 +3,10 @@
 ## 目前進度
 
 本作業已完成。程式包含資料切分、特徵縮放、L1 特徵選取、GridSearchCV 模型選取、
-管線儲存與模型評估；另已產生特徵選取遮罩圖、混淆矩陣圖、結果報告與提交 ZIP。
+管線儲存與模型評估；另已產生特徵選取遮罩圖、混淆矩陣圖、誤判樣本圖、結果報告與提交 ZIP。
+
+2026-10-06 補上題目第 7 頁（投影片 p.61）的預期結果 3：先前的檢查只看到前 6 頁而漏掉。
+同時把遮罩圖（不畫座標軸）與混淆矩陣圖（每格含 0 都標數字、不加標題）改成與投影片同樣式。
 
 ## 這份作業在學什麼
 
@@ -17,6 +20,7 @@
 5. 在測試集（約 360 筆）上的整體正確率須達 95% 以上。
 6. 以 `joblib.dump()` 將訓練好的最佳模型（指整條管線）儲存成檔案。
 7. 視覺化特徵選取遮罩，並輸出測試集的分類報告與混淆矩陣。
+8. 輸出誤判的樣本總數，繪出所有誤判樣本（標示真實標籤與預測結果），且必須與混淆矩陣對應。
 
 ## 繳交規定（與前兩次不同）
 
@@ -50,16 +54,18 @@ StandardScaler → SelectFromModel(L1 LogisticRegression) → LogisticRegression
 以 5-fold StratifiedKFold 交叉驗證搜尋 `selector__max_features`（32 / 40 / 44）
 與 `classifier__C`（0.1 / 1.0 / 10.0）共 9 組組合。
 
-最佳組合為 `max_features=40`、`C=1.0`，交叉驗證正確率 0.9638，測試集正確率 0.9750。
+最佳組合為 `max_features=40`、`C=1.0`，交叉驗證正確率 0.9638，測試集正確率 0.9750，
+測試集共誤判 9 張。
 
 ## 預計輸出
 
 - `digits_pipeline_lr.pkl`：以 `joblib.dump()` 儲存的完整管線
 - `assignment3_feature_mask.png`：8×8 特徵選取遮罩圖，標題含選取比例 40/64
 - `assignment3_confusion_matrix.png`：測試集混淆矩陣
-- `assignment3_results.txt`：分類報告與混淆矩陣文字輸出
+- `assignment3_misclassified.png`：所有誤判樣本（每列 5 張，標題為真實標籤，左下角紅字為預測）
+- `assignment3_results.txt`：分類報告、混淆矩陣與誤判總數文字輸出
 - `assignment3_improvement_study.json`：改善空間研究的量測結果
-- `515661055_陳欣怡_Assignment3_結果報告.pdf`：十二頁結果報告（含改善空間討論）
+- `515661055_陳欣怡_Assignment3_結果報告.pdf`：十三頁結果報告（含改善空間討論）
 - `515661055_陳欣怡_Assignment3.zip`：提交檔案
 
 ## 檔案

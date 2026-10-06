@@ -28,6 +28,8 @@ IMAGE_SHAPE = (8, 8)
 MODEL_FILENAME = "digits_pipeline_lr.pkl"
 MASK_FIGURE = "assignment3_feature_mask.png"
 CONFUSION_FIGURE = "assignment3_confusion_matrix.png"
+MISCLASSIFIED_FIGURE = "assignment3_misclassified.png"
+MISCLASSIFIED_COLUMNS = 5
 RESULTS_FILENAME = "assignment3_results.txt"
 
 
@@ -55,11 +57,11 @@ def feature_mask_title(mask):
     return f"Feature Selection Mask (Selected: {int(np.count_nonzero(mask))}/{TOTAL_PIXELS})"
 
 
-def plot_feature_mask(mask, output_path):
-    """以 8x8 遮罩圖呈現特徵選取結果：0 為淘汰、1 為選取。"""
+def make_feature_mask_figure(mask):
+    """以 8x8 遮罩圖呈現特徵選取結果：0 為淘汰、1 為選取（樣式比照投影片 p.59）。"""
     grid = np.asarray(mask, dtype=int).reshape(IMAGE_SHAPE)
 
-    fig, ax = plt.subplots(figsize=(6.0, 6.4), dpi=200)
+    fig, ax = plt.subplots(figsize=(6.0, 6.2), dpi=200)
     ax.imshow(grid, cmap="Blues", vmin=0, vmax=1)
     for row in range(IMAGE_SHAPE[0]):
         for column in range(IMAGE_SHAPE[1]):
@@ -70,53 +72,82 @@ def plot_feature_mask(mask, output_path):
                 str(value),
                 ha="center",
                 va="center",
-                fontsize=9,
+                fontsize=7,
                 color="white" if value else "#1f3b63",
             )
     ax.set_title(feature_mask_title(mask), fontsize=12, pad=12)
-    ax.set_xticks(range(IMAGE_SHAPE[1]))
-    ax.set_yticks(range(IMAGE_SHAPE[0]))
-    ax.set_xlabel("Pixel column")
-    ax.set_ylabel("Pixel row")
+    ax.axis("off")
     fig.tight_layout()
-    fig.savefig(output_path)
-    plt.close(fig)
-    return output_path
+    return fig
 
 
-def plot_confusion_matrix(matrix, output_path):
-    """視覺化呈現測試集混淆矩陣。"""
+def make_confusion_matrix_figure(matrix):
+    """視覺化呈現測試集混淆矩陣，每格（含 0）都標數字（樣式比照投影片 p.60）。"""
     fig, ax = plt.subplots(figsize=(6.4, 6.0), dpi=200)
-    ax.imshow(matrix, cmap="Blues")
+    ax.imshow(matrix, cmap="Blues", alpha=0.3)
     for row in range(matrix.shape[0]):
         for column in range(matrix.shape[1]):
-            count = int(matrix[row, column])
-            if count:
-                ax.text(
-                    column,
-                    row,
-                    str(count),
-                    ha="center",
-                    va="center",
-                    fontsize=8,
-                    color="white" if count > matrix.max() / 2 else "#1f3b63",
-                )
-    ax.set_title("Confusion Matrix (Test Set)", fontsize=12, pad=12)
+            ax.text(column, row, str(int(matrix[row, column])), ha="center", va="center", fontsize=7)
     ax.set_xlabel("Predicted label")
     ax.set_ylabel("True label")
     ax.set_xticks(range(matrix.shape[1]))
     ax.set_yticks(range(matrix.shape[0]))
     fig.tight_layout()
+    return fig
+
+
+def find_misclassified(y_test, y_pred):
+    """回傳測試集中預測錯誤的樣本索引（依測試集順序）。"""
+    return np.flatnonzero(np.asarray(y_pred) != np.asarray(y_test))
+
+
+def misclassified_message(count):
+    return f"測試集總共誤判了 {count} 張圖片。"
+
+
+def make_misclassified_figure(X_test, y_test, y_pred, indices):
+    """繪出所有誤判樣本：標題為真實標籤，左下角紅字為預測結果（樣式比照投影片 p.61）。"""
+    rows = max(1, -(-len(indices) // MISCLASSIFIED_COLUMNS))
+    fig, axes = plt.subplots(
+        rows,
+        MISCLASSIFIED_COLUMNS,
+        figsize=(2.4 * MISCLASSIFIED_COLUMNS, 2.8 * rows),
+        dpi=200,
+        squeeze=False,
+    )
+    for ax in axes.ravel():
+        ax.axis("off")
+    for ax, index in zip(axes.ravel(), indices):
+        ax.imshow(X_test[index].reshape(IMAGE_SHAPE), cmap="gray")
+        ax.set_title(f"True: {y_test[index]}", fontsize=11)
+        ax.text(
+            0.04,
+            0.04,
+            str(y_pred[index]),
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=12,
+            fontweight="bold",
+            color="red",
+            bbox={"facecolor": "white", "alpha": 0.8, "pad": 1, "edgecolor": "none"},
+        )
+    fig.tight_layout(h_pad=1.5)
+    return fig
+
+
+def save_figure(fig, output_path):
     fig.savefig(output_path)
     plt.close(fig)
     return output_path
 
 
 def evaluate(model, X_test, y_test):
-    """在測試集上評估：正確率、分類報告與混淆矩陣。"""
+    """在測試集上評估：正確率、分類報告、混淆矩陣與誤判樣本。"""
     y_pred = model.predict(X_test)
     return {
         "y_pred": y_pred,
+        "misclassified": find_misclassified(y_test, y_pred),
         "accuracy": float((y_pred == y_test).mean()),
         "report": classification_report(y_test, y_pred, digits=2),
         "confusion_matrix": confusion_matrix(y_test, y_pred),
@@ -139,12 +170,14 @@ def _format_results(result, mask):
         "混淆矩陣 (Confusion Matrix):",
         np.array2string(result["confusion_matrix"]),
         "",
+        misclassified_message(len(result["misclassified"])),
+        "",
     ]
     return "\n".join(lines)
 
 
 def run_evaluation(model_path=None, output_dir=None):
-    """載入模型、評估測試集，並輸出兩張圖與文字結果。"""
+    """載入模型、評估測試集，並輸出三張圖與文字結果。"""
     destination = Path(output_dir) if output_dir is not None else Path(__file__).resolve().parent
     destination.mkdir(parents=True, exist_ok=True)
 
@@ -153,8 +186,14 @@ def run_evaluation(model_path=None, output_dir=None):
     mask = extract_feature_mask(model)
     result = evaluate(model, X_test, y_test)
 
-    plot_feature_mask(mask, destination / MASK_FIGURE)
-    plot_confusion_matrix(result["confusion_matrix"], destination / CONFUSION_FIGURE)
+    save_figure(make_feature_mask_figure(mask), destination / MASK_FIGURE)
+    save_figure(
+        make_confusion_matrix_figure(result["confusion_matrix"]), destination / CONFUSION_FIGURE
+    )
+    save_figure(
+        make_misclassified_figure(X_test, y_test, result["y_pred"], result["misclassified"]),
+        destination / MISCLASSIFIED_FIGURE,
+    )
     (destination / RESULTS_FILENAME).write_text(
         _format_results(result, mask), encoding="utf-8"
     )

@@ -39,3 +39,8 @@ doc/_build
 
 # Other
 .python-version
+# Lecture sample outputs (datasets auto-downloaded by torchvision, trained weights)
+lecture/*/MNIST/
+lecture/*/FashionMNIST/
+lecture/*/CelebA/
+lecture/*/*.pth

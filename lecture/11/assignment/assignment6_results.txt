@@ -1,0 +1,12 @@
+Assignment #6 - 基準一年後糖尿病疾病進展之預測器
+========================================================
+
+資料集: sklearn.datasets.load_diabetes()（442 筆、10 維特徵）
+切分比例: 80% 訓練集 / 20% 測試集（測試集 89 筆）
+
+========== 各模型效能比較 ==========
+[Linear Regression] MSE: 2900.17 | R² Score: 0.4526
+[Polynomial Regression] MSE: 3159.34 | R² Score: 0.4037
+[PyTorch MLP Regressor] MSE: 2631.53 | R² Score: 0.5033
+
+最佳模型: PyTorch MLP Regressor（R² Score 0.5033）

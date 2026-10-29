@@ -1,0 +1,106 @@
+{
+  "baseline": {
+    "n_components": 40,
+    "classifier_C": 1.0
+  },
+  "cv_folds": 5,
+  "experiments": [
+    {
+      "group": "component_budget",
+      "label": "PCA 10 維",
+      "cv_accuracy": 0.8802966511807975,
+      "cv_std": 0.008824271965176106
+    },
+    {
+      "group": "component_budget",
+      "label": "PCA 20 維",
+      "cv_accuracy": 0.9415408439798684,
+      "cv_std": 0.00809405212850041
+    },
+    {
+      "group": "component_budget",
+      "label": "PCA 30 維",
+      "cv_accuracy": 0.9575517808749516,
+      "cv_std": 0.004608456479793778
+    },
+    {
+      "group": "component_budget",
+      "label": "PCA 40 維（上限）",
+      "cv_accuracy": 0.9638114595431668,
+      "cv_std": 0.006837973956777389
+    },
+    {
+      "group": "whitening",
+      "label": "不白化（基準）",
+      "cv_accuracy": 0.9638114595431668,
+      "cv_std": 0.006837973956777389
+    },
+    {
+      "group": "whitening",
+      "label": "白化 whiten=True",
+      "cv_accuracy": 0.9540771389856756,
+      "cv_std": 0.004553080493461556
+    },
+    {
+      "group": "hyperparameter",
+      "label": "C = 0.1",
+      "cv_accuracy": 0.9575493612078978,
+      "cv_std": 0.0034215786208163378
+    },
+    {
+      "group": "hyperparameter",
+      "label": "C = 1.0（基準）",
+      "cv_accuracy": 0.9638114595431668,
+      "cv_std": 0.006837973956777389
+    },
+    {
+      "group": "hyperparameter",
+      "label": "C = 10.0",
+      "cv_accuracy": 0.9519744483159117,
+      "cv_std": 0.006807941270130882
+    },
+    {
+      "group": "hyperparameter",
+      "label": "C = 100.0",
+      "cv_accuracy": 0.9450179055361982,
+      "cv_std": 0.004140739685878165
+    },
+    {
+      "group": "extraction_method",
+      "label": "PCA（基準）",
+      "cv_accuracy": 0.9638114595431668,
+      "cv_std": 0.006837973956777389
+    },
+    {
+      "group": "extraction_method",
+      "label": "Kernel PCA (RBF)",
+      "cv_accuracy": 0.9387509678668217,
+      "cv_std": 0.010046560174684572
+    },
+    {
+      "group": "extraction_method",
+      "label": "LDA（9 維上限）",
+      "cv_accuracy": 0.9519817073170731,
+      "cv_std": 0.007444989566199323
+    },
+    {
+      "group": "nonlinear",
+      "label": "Logistic Regression（基準）",
+      "cv_accuracy": 0.9638114595431668,
+      "cv_std": 0.006837973956777389
+    },
+    {
+      "group": "nonlinear",
+      "label": "RBF SVM",
+      "cv_accuracy": 0.9791255323267519,
+      "cv_std": 0.00438644728829204
+    }
+  ],
+  "final_test_accuracy": 0.9611111111111111,
+  "explained_variance_by_components": {
+    "10": 0.5923136001673822,
+    "20": 0.7959485212360474,
+    "30": 0.8955486171209879,
+    "40": 0.9517900844659384
+  }
+}

@@ -259,5 +259,45 @@ class Assignment1TypographyTests(unittest.TestCase):
         self.assertEqual(page_numbers[0][1], "ArialMT")
 
 
+class MonoBlockTests(unittest.TestCase):
+    """mono() 的等寬區塊：ASCII 用等寬字，含中文的行必須 fallback 才不會掉字。"""
+
+    def _spans(self, block):
+        import fitz
+        import tempfile
+
+        report = report_style.Report()
+        report.page("測試")
+        report.mono(block)
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "mono.pdf"
+            report.save(output)
+            page = fitz.open(output)[0]
+            return [
+                (span["text"], span["font"].split("+")[-1])
+                for block_ in page.get_text("dict")["blocks"]
+                for line in block_.get("lines", [])
+                for span in line["spans"]
+            ]
+
+    def test_ascii_lines_stay_in_the_monospace_font(self):
+        spans = self._spans("precision    recall  f1-score")
+
+        fonts = {font for text, font in spans if "precision" in text}
+        self.assertEqual(fonts, {"DejaVuSansMono"})
+
+    def test_lines_with_chinese_are_not_drawn_in_the_cjk_less_mono_font(self):
+        # DejaVuSansMono 沒有中文字符。用它排中文時文字層仍抽得到字，
+        # 但畫出來的是空白 glyph，所以必須檢查字型而非抽取結果。
+        spans = self._spans("========== 各模型效能比較 ==========")
+
+        chinese_fonts = {
+            font for text, font in spans if any("\u4e00" <= c <= "\u9fff" for c in text)
+        }
+
+        self.assertTrue(chinese_fonts, "沒有找到含中文的 span")
+        self.assertNotIn("DejaVuSansMono", chinese_fonts)
+
+
 if __name__ == "__main__":
     unittest.main()

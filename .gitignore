@@ -44,3 +44,4 @@ lecture/*/MNIST/
 lecture/*/FashionMNIST/
 lecture/*/CelebA/
 lecture/*/*.pth
+lecture/*/*/CelebA

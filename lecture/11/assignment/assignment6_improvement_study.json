@@ -1,0 +1,123 @@
+{
+  "cv_folds": 5,
+  "experiments": [
+    {
+      "group": "regularization",
+      "label": "多元線性回歸（基準）",
+      "cv_r2": 0.4803652627611704,
+      "cv_std": 0.04088277167273684
+    },
+    {
+      "group": "regularization",
+      "label": "Ridge (alpha=1.0)",
+      "cv_r2": 0.48078487124285313,
+      "cv_std": 0.040419796544859846
+    },
+    {
+      "group": "regularization",
+      "label": "Ridge (alpha=10.0)",
+      "cv_r2": 0.47974424268013377,
+      "cv_std": 0.038923317663185616
+    },
+    {
+      "group": "regularization",
+      "label": "Lasso (alpha=0.1)",
+      "cv_r2": 0.48119515810336183,
+      "cv_std": 0.03979555833878616
+    },
+    {
+      "group": "regularization",
+      "label": "Lasso (alpha=1.0)",
+      "cv_r2": 0.4807698463463074,
+      "cv_std": 0.03646748760250861
+    },
+    {
+      "group": "regularization",
+      "label": "ElasticNet (alpha=0.1)",
+      "cv_r2": 0.47986023739293004,
+      "cv_std": 0.03786370164517496
+    },
+    {
+      "group": "polynomial_fix",
+      "label": "degree=2 不正規化（基準）",
+      "cv_r2": 0.331374557292614,
+      "cv_std": 0.07824437351760503
+    },
+    {
+      "group": "polynomial_fix",
+      "label": "degree=2 + Ridge (alpha=10)",
+      "cv_r2": 0.41725983443398523,
+      "cv_std": 0.061033280859291494
+    },
+    {
+      "group": "polynomial_fix",
+      "label": "degree=2 + Ridge (alpha=100)",
+      "cv_r2": 0.449806499883854,
+      "cv_std": 0.05497597759790361
+    },
+    {
+      "group": "polynomial_fix",
+      "label": "degree=2 + Lasso (alpha=1.0)",
+      "cv_r2": 0.44544847758847456,
+      "cv_std": 0.057403212173840194
+    },
+    {
+      "group": "mlp_capacity",
+      "label": "隱藏層 (8,)",
+      "cv_r2": 0.4396887880765732,
+      "cv_std": 0.05214666397827848
+    },
+    {
+      "group": "mlp_capacity",
+      "label": "隱藏層 (32, 16)（基準）",
+      "cv_r2": 0.4360676208201933,
+      "cv_std": 0.030353809574824683
+    },
+    {
+      "group": "mlp_capacity",
+      "label": "隱藏層 (128, 64)",
+      "cv_r2": 0.4535820818799653,
+      "cv_std": 0.04029491152444892
+    },
+    {
+      "group": "mlp_capacity",
+      "label": "隱藏層 (256, 128, 64)",
+      "cv_r2": 0.43062974599296755,
+      "cv_std": 0.04227776776618249
+    },
+    {
+      "group": "other_algorithms",
+      "label": "KNN (k=9)",
+      "cv_r2": 0.3984827274962533,
+      "cv_std": 0.043451373700862855
+    },
+    {
+      "group": "other_algorithms",
+      "label": "KNN (k=15)",
+      "cv_r2": 0.4150629744348552,
+      "cv_std": 0.02141414120525296
+    },
+    {
+      "group": "other_algorithms",
+      "label": "隨機森林 (300 棵)",
+      "cv_r2": 0.42557456333750443,
+      "cv_std": 0.06804324418650612
+    }
+  ],
+  "final_test_metrics": {
+    "Linear Regression": {
+      "mse": 2900.1732878832318,
+      "r2": 0.45260660216173787
+    },
+    "Polynomial Regression": {
+      "mse": 3159.3412229822407,
+      "r2": 0.4036899332174081
+    },
+    "PyTorch MLP Regressor": {
+      "mse": 2631.5257225840987,
+      "r2": 0.5033125045312483
+    }
+  },
+  "mlp_best_epoch": 158,
+  "n_test": 89
+}

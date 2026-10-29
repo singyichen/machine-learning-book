@@ -1,0 +1,54 @@
+{
+  "epochs_per_run": 8,
+  "n_train": 16000,
+  "n_valid": 1000,
+  "batch_size": 32,
+  "learning_rate": 0.001,
+  "experiments": [
+    {
+      "group": "architecture",
+      "label": "課堂範例原架構（無 BN、Dropout 0.5）",
+      "best_valid_loss": 0.6327237840741873,
+      "best_valid_accuracy": 0.655,
+      "best_epoch": 8,
+      "n_parameters": 388673,
+      "seconds": 209.3
+    },
+    {
+      "group": "architecture",
+      "label": "加入 BatchNorm（Dropout 仍 0.5）",
+      "best_valid_loss": 0.25443541002459824,
+      "best_valid_accuracy": 0.88,
+      "best_epoch": 8,
+      "n_parameters": 389633,
+      "seconds": 1250.9
+    },
+    {
+      "group": "architecture",
+      "label": "BatchNorm + 調低 Dropout（繳交版本）",
+      "best_valid_loss": 0.25455347110982984,
+      "best_valid_accuracy": 0.89,
+      "best_epoch": 7,
+      "n_parameters": 389633,
+      "seconds": 147.2
+    },
+    {
+      "group": "width",
+      "label": "繳交版本再加寬一倍通道",
+      "best_valid_loss": 0.234535351395607,
+      "best_valid_accuracy": 0.893,
+      "best_epoch": 8,
+      "n_parameters": 1553409,
+      "seconds": 244.5
+    },
+    {
+      "group": "augmentation",
+      "label": "繳交版本、關閉資料增強",
+      "best_valid_loss": 0.2285103037720546,
+      "best_valid_accuracy": 0.907,
+      "best_epoch": 6,
+      "n_parameters": 389633,
+      "seconds": 143.3
+    }
+  ]
+}

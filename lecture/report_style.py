@@ -331,9 +331,18 @@ class Report:
         return self
 
     def mono(self, block, size=MONO_SIZE):
+        """等寬區塊（分類報告、程式輸出等）。
+
+        預設的 monospace 字型是 DejaVuSansMono，它沒有中文字符：拿它排中文時
+        PDF 的文字層仍抽得到字，畫出來的卻是空白 glyph，光看抽取結果不會發現。
+        因此含中文的行改用 Arial Unicode（非等寬，但至少完整呈現）。
+        """
         mono_prop = font_manager.FontProperties(family="monospace", size=size)
         for line in block.splitlines():
-            self._write(x_fraction(BULLET_MARK_PT), self.y, line, size, mono_prop)
+            has_cjk = any("⺀" <= character <= "鿿" for character in line)
+            self._write(
+                x_fraction(BULLET_MARK_PT), self.y, line, size, BODY if has_cjk else mono_prop
+            )
             self._advance(13)
         self._check_room()
         return self

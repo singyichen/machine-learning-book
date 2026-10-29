@@ -1,0 +1,42 @@
+{
+  "1": {
+    "accuracy": 0.92,
+    "n_test": 10000,
+    "misclassified": 783,
+    "report": "              precision    recall  f1-score   support\n\n Not Smiling       0.91      0.93      0.92      4985\n     Smiling       0.93      0.91      0.92      5015\n\n    accuracy                           0.92     10000\n   macro avg       0.92      0.92      0.92     10000\nweighted avg       0.92      0.92      0.92     10000",
+    "per_class": {
+      "Not Smiling": {
+        "precision": 0.91,
+        "recall": 0.93,
+        "f1": 0.92,
+        "support": 4985
+      },
+      "Smiling": {
+        "precision": 0.93,
+        "recall": 0.91,
+        "f1": 0.92,
+        "support": 5015
+      }
+    }
+  },
+  "2": {
+    "accuracy": 0.93,
+    "n_test": 10000,
+    "misclassified": 708,
+    "report": "              precision    recall  f1-score   support\n\n Not Smiling       0.93      0.93      0.93      4985\n     Smiling       0.93      0.93      0.93      5015\n\n    accuracy                           0.93     10000\n   macro avg       0.93      0.93      0.93     10000\nweighted avg       0.93      0.93      0.93     10000",
+    "per_class": {
+      "Not Smiling": {
+        "precision": 0.93,
+        "recall": 0.93,
+        "f1": 0.93,
+        "support": 4985
+      },
+      "Smiling": {
+        "precision": 0.93,
+        "recall": 0.93,
+        "f1": 0.93,
+        "support": 5015
+      }
+    }
+  }
+}

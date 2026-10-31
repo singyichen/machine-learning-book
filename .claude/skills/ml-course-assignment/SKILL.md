@@ -20,7 +20,8 @@ TDD 的做法請用 `superpowers:test-driven-development`，程式架構看 repo
 投影片編號比週次小 1。使用者通常會直接說「第 7 週」，照他說的建 `lecture/07/`。
 若不確定，拿 Downloads 裡的 `NN_*.py` 和既有 `lecture/MM/MM_*.py` 做 diff 比對就能確認對應關係。
 
-歷史對照：Assignment #1 → `lecture/02/`，#2 → `lecture/05/`，#3 → `lecture/07/`。
+歷史對照：Assignment #1 → `lecture/02/`，#2 → `lecture/05/`，#3 → `lecture/07/`，
+#4 → `lecture/09/`，#5 → `lecture/10/`，#6 → `lecture/11/`。
 
 每週資料夾的結構固定為：最上層放教授的課堂範例（`NN_*.py` 與它讀的資料檔，投影片編號改成週次），`assignment/` 才放作業。範例執行產生的輸出（`.pkl` 等）不進版控。沒有範例程式的週就不建資料夾。
 
@@ -38,6 +39,12 @@ TDD 的做法請用 `superpowers:test-driven-development`，程式架構看 repo
 
 3. **TDD 實作**。測試要能真的抓到錯——寫完跑一次突變檢測（故意改壞常數、改壞
    儲存邏輯），確認每個突變至少讓一個測試失敗。測試檔命名 `test_NN_assignmentM.py`。
+
+   **突變存活時，要看懂斷言為什麼驗不到，不是加一條湊數的斷言。**
+   A6 的 early stopping 測試原本斷言 `best_epoch < MAX_EPOCHS`——把 `break` 拿掉、
+   跑滿 2000 輪之後，最佳輪次仍然是第 158 輪，條件照樣成立，等於完全沒驗到提早停止。
+   改成檢查迴圈真的中斷（`len(valid_losses) < MAX_EPOCHS`）才抓得到。
+   斷言要盯住「被改壞的那個行為本身」，不是它的副產品。
 
 4. **產生圖表與文字結果**，逐張用 Read 目視檢查，確認標題、座標軸、圖例完整。
 
@@ -180,6 +187,54 @@ mathtext 不支援 `\big` / `\Big`（會直接拋 `Unknown symbol`），括號�
   新 clone 沒有 `.venv` 時，系統 python3 太新（3.14）不能用，以 uv 重建：
   `~/.local/bin/uv venv --python 3.9 .venv && ~/.local/bin/uv pip install --python .venv/bin/python
   numpy==1.26.4 scipy==1.13.1 scikit-learn==1.0.2 matplotlib==3.5.3 "pandas<2" joblib pymupdf`
+  （`uv` 不一定在 `~/.local/bin/`，不在就用 `.venv/bin/python -m pip`。）
+- **`Ridge` 在這個環境會回傳 nan**。sklearn 1.0.2 的 `_solve_cholesky` 呼叫
+  `scipy.linalg.solve(..., sym_pos=True)`，而 scipy 1.13 已移除該參數，fit 直接拋
+  `TypeError`，被 `cross_val_score` 吞成 nan、不會報錯。要用 Ridge 就指定
+  `solver="svd"` 繞過 cholesky 路徑。看到整欄 nan 先想到這裡，別去找自己的 bug。
+- **`report_style.mono()` 排中文**：預設的 monospace 是 DejaVuSansMono，它沒有中文字符。
+  拿它排中文時 PDF 的文字層仍抽得到字，畫出來的卻是空白 glyph——只檢查抽取結果或
+  字型名稱都驗不出來，一定要檢查「含中文的 span 用了哪個字型」。
+  `mono()` 已改成含中文的行自動 fallback 到 Arial Unicode，純 ASCII 行行為不變。
+
+## 深度學習作業（PyTorch / CNN）的額外地雷
+
+從 Assignment #4（CelebA 微笑分類）學到的，下次做 CNN 類作業會再遇到：
+
+- **CelebA 官方下載已失效**。torchvision 的 `download=True` 走 Google Drive，長期卡在
+  「Too many users have viewed or downloaded this file recently」，裝了 gdown 也一樣。
+  解法在 `lecture/09/assignment/prepare_celeba_local.py`：改由 HuggingFace 的
+  `eurecom-ds/celeba` 鏡像取影像與 40 維屬性，重建成 torchvision 期望的目錄結構。
+  該鏡像的 train/valid/test 筆數 162770 / 19867 / 19962 與官方 partition 完全一致，
+  且只需解出作業用到的那幾萬張，不必抓整包 8.9 GB。
+  重建的標註檔內容正確但行尾格式不同、md5 對不上會被判定 corrupted，
+  用 `celeba_local_patch.py` 把期望 md5 換成本機實際值（**繳交腳本絕不 import 它**，
+  助教環境的 CelebA 是官方原檔，md5 本來就吻合）。
+  **驗資料對不對的最好方法**：拿分類報告的 support 欄跟投影片比。測試集前 10000 筆
+  應為 Not Smiling 4985 / Smiling 5015，和投影片 p.69 一字不差，順序錯了就對不上。
+- **這台機器 16 GB，CNN 訓練很容易被 OOM killer 殺掉**（實際被殺過三次）。三個原則：
+  1. **不要並行跑重工作**。訓練、測試套件、改善研究同時開會直接炸掉。一次只跑一件。
+  2. **每個 `CelebA` 物件都會把五個標註檔（202,599 行）讀成 tensor**，建一個就是數十 MB。
+     多組實驗要共用同一份 dataset，不要每組重新 `load_datasets()`；
+     用不到 test split 就傳 `include_test=False`。
+  3. **逐組存檔 + 每組獨立行程**。研究腳本支援 `--limit 1`，由外層 shell 迴圈每組開一個
+     新行程——行程結束才會把 MPS 與 dataset 佔的記憶體完全還給系統。
+     逐組存檔讓被殺掉時已完成的組別得以保留，重跑只補未完成的。這是能跑完的關鍵。
+- **訓練很慢，先用 `--epochs 1` 冒煙測試**再開完整訓練。實測單輪時間：
+  自建 CNN（64×64、16000 張）約 28 秒；ResNet-18（224×224）約 200 秒。
+- **改善空間研究做不了交叉驗證**（訓練一次十幾分鐘）。改用**固定訓練預算**的對照實驗：
+  每組都只訓練同樣輪數、同一組種子、同一份訓練集，比較驗證集最佳表現。
+  報告要寫明這比較的是「相同預算下誰學得快」，不是最終收斂上限——
+  A4 就出現「關閉資料增強在 8 輪內反而較高」，但完整 30 輪訓練仍以開啟增強為準。
+  **實驗結果和草稿論點矛盾時，改報告去配合數據，不是反過來。**
+- **繳交腳本用相對路徑 `"CelebA"`**（照課堂範例），而資料集放在 `lecture/NN/CelebA`。
+  在 `assignment/` 下執行會找不到而嘗試下載，要建 symlink `CelebA -> ../CelebA`
+  （`.gitignore` 已有 `lecture/*/*/CelebA`）。助教環境不受影響。
+- **繳交腳本的架構是手抄的，很容易和訓練時漂移**。最有效的測試是「實際執行繳交腳本」：
+  架構只要有一層對不上，`load_state_dict()` 就會直接失敗。報告的數字也直接從這次執行的
+  stdout 解析，不要手抄。
+- **大模型檔會讓 zip 變很大**。ResNet-18 的 `.pth` 就 45 MB，A4 的繳交 zip 共 42 MB。
+  照慣例仍進版控（已和使用者確認過），但要提醒使用者確認作業系統的上傳大小限制。
 
 ## 提交前驗證
 
@@ -209,6 +264,9 @@ mathtext 不支援 `\big` / `\Big`（會直接拋 `Unknown symbol`），括號�
       `DejaVuSans-Oblique`，表示 mathtext 字型設定沒生效（`DejaVuSansMono` 是 `mono()`
       的分類報告，屬正常）。沒有 fitz 時可改用 `pdffonts <pdf>`。
       **只檢查字型名稱不夠**——A2 曾經字型名稱檢查通過、字級卻全錯，所以一定要跑上一項的測試。
+      多出 `STIXGeneral` 時，是某個數學符號在 Computer Modern 沒有對應 glyph 而 fallback；
+      A6 的來源是公式裡的 `\dots`（改用 `...` 就走 `Cmr10`）。找出是哪個字元：
+      列出 span 的 `font` 與 `text`，挑 `'STIX' in font` 的看。
 - [ ] `verification_checklist.md` 寫入實際數值，而非「已完成」
 
 ## Commit

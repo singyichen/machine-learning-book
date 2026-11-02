@@ -22,6 +22,8 @@ print("矩陣形狀 (Shape):", mat.shape) # 輸出 (2, 3)
 zeros_mat = np.zeros((2, 2))     # 2x2 全零矩陣
 ones_mat = np.ones((3, 2))       # 3x2 全一矩陣
 identity_mat = np.eye(3)         # 3x3 單位矩陣 (對角線為 1)
+print("\n全零矩陣:\n", zeros_mat)
+print("\n全一矩陣:\n", ones_mat)
 print("\n單位矩陣:\n", identity_mat)
 
 # 4. 指定資料型別 (Data Types)
